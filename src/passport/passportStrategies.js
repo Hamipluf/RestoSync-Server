@@ -87,6 +87,7 @@ passport.use(
         id: userDB.id,
         name: userDB.name,
         last_name: userDB.last_name,
+        username: userDB.usermame,
         role: userDB.role,
         email: userDB.email,
         photos: userDB.photos,
