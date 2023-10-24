@@ -100,9 +100,18 @@ export const register = (req, res) => {
       );
   }
   const token = authManager.generateToken(user);
+  const userResponse = {
+    name: user.name,
+    last_name: user.last_name,
+    email: user.email,
+    username: user.username,
+    role: user.role,
+    photos: user.photos,
+    tasks: user.tasks,
+  };
   res.json(
     customResponses.responseOk(200, "User registrado con exito", {
-      user,
+      userResponse,
       token,
     })
   );
@@ -124,26 +133,28 @@ export const login = (req, res) => {
       );
   }
   const token = authManager.generateToken(user);
-  res.json(customResponses.responseOk(200, "Bienvenido", { user, token }));
+  const userResponse = {
+    name: user.name,
+    last_name: user.last_name,
+    email: user.email,
+    username: user.username,
+    role: user.role,
+    photos: user.photos,
+    tasks: user.tasks,
+  };
+  res.json(
+    customResponses.responseOk(200, "Bienvenido", { userResponse, token })
+  );
 };
 // Autentica y recupera el user loggeado
 export const authUser = (req, res) => {
   const currentUser = req.user;
-  if (!currentUser) {
+  if (currentUser.error) {
     return res
       .status(400)
-      .json(customResponses.badResponse(400, "No hay usuario logueado"));
+      .json(customResponses.badResponse(400, currentUser.message));
   }
-  const insensitiveUser = {
-    id: currentUser.id,
-    name: currentUser.name,
-    lastname: currentUser.lastname,
-    email: currentUser.email,
-    username: currentUser.username,
-    photos: currentUser.photos,
-    tasks: currentUser.tasks,
-  };
   res
     .status(200)
-    .json(customResponses.responseOk(200, "Curren user", insensitiveUser));
+    .json(customResponses.responseOk(200, "Curren user", currentUser));
 };

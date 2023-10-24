@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import UserManager from "../persistencia/DAOs/user.posgresql.js";
 const userManager = new UserManager();
 
@@ -49,10 +50,10 @@ passport.use(
           password,
         };
         const userDB = await userManager.loginUser(userData);
-        if (!userDB.error) {
+        if (userDB.error) {
           const response = {
             error: true,
-            message: `Ya existe un usuario con el email ${email}`,
+            message: userDB.message,
           };
           return done(false, response);
         }
@@ -61,6 +62,37 @@ passport.use(
       } catch (error) {
         done(error);
       }
+    }
+  )
+);
+
+// Auth JWT
+passport.use(
+  "JWT",
+  new JwtStrategy(
+    {
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.SECRET_JWT,
+    },
+    async (jwt_payload, done) => {
+      const userDB = await userManager.getUserById(jwt_payload.id);
+      if (!userDB || !userDB.id) {
+        const response = {
+          error: true,
+          message: "No existe un user con ese token",
+        };
+        return done(false, response);
+      }
+      const insensitiveUser = {
+        id: userDB.id,
+        name: userDB.name,
+        last_name: userDB.last_name,
+        role: userDB.role,
+        email: userDB.email,
+        photos: userDB.photos,
+        tasks: userDB.tasks,
+      };
+      done(null, insensitiveUser);
     }
   )
 );

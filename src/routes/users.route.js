@@ -6,11 +6,18 @@ import {
   login,
   authUser,
 } from "../contollers/users.controllers.js";
-import isAdmin from "../middlewares/isAdmin.middleware.js"
+import isAdmin from "../middlewares/isAdmin.middleware.js";
 import passport from "passport";
 const router = Router();
 // user autenticado
-// router.get("/current", authMiddleware, authUser);
+router.get(
+  "/current",
+  passport.authenticate("JWT", {
+    passReqToCallback: true,
+    session: false,
+  }),
+  authUser
+);
 // Todos los users
 router.get("/get-all", getAll);
 // Solamente authenticados y administradores tienen acceso a un solo user

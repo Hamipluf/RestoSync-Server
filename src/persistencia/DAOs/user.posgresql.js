@@ -29,6 +29,9 @@ export default class UserManager {
   }
   async registerUser(user) {
     const { name, last_name, email, password, role, username } = user;
+    if (!email || !password || !last_name || !name || !role || !username) {
+      return { error: true, message: "Faltan campos a completar." };
+    }
     try {
       const passwordHashed = await hashData(password);
       const userData = {
@@ -64,18 +67,20 @@ export default class UserManager {
   }
   async loginUser(user) {
     const { email, password } = user;
+    if (!email || !password) {
+      return { error: true, message: "Faltan campos a completar." };
+    }
     try {
       const user = await this.getUserByEmail(email);
       if (user) {
         const isPassword = await compareData(password, user.password);
         return isPassword
           ? user
-          : { error: true, message: "Contraseña incorrecta" };
+          : { error: true, message: "Contraseña incorrecta." };
       }
     } catch (error) {
       console.log("Error loginUser user.posgres", error);
-      return { error: true, message: "error en user.posgres login" };
+      return { error: true, message: "No existe un user con ese email" };
     }
   }
- 
 }
