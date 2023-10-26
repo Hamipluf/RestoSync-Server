@@ -29,10 +29,6 @@ export default class ProductManager {
   }
   // Crear un producto
   async createProduct(product) {
-    const { title, description, stock, categoria, price } = product;
-    if (!title || !stock || !price) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
       const productCreated = await productService.createProduct(product);
       return productCreated;
@@ -41,18 +37,13 @@ export default class ProductManager {
       return { error: true, data: err };
     }
   }
-
   // Actualizar un campo del producto por ID
-  async updateProductField(productId, fieldToUpdate, newValue) {
-    if (!productId || !fieldToUpdate || newValue === undefined) {
+  async updateProductField(pid, newInfo) {
+    if (!pid || !newInfo) {
       return { error: true, message: "Faltan campos a completar." };
     }
     try {
-      const updatedProduct = await productService.updateProductField(
-        productId,
-        fieldToUpdate,
-        newValue
-      );
+      const updatedProduct = await productService.updateProduct(pid, newInfo)
       return updatedProduct;
     } catch (err) {
       console.log("ERROR updateProductField product.postgres", err);

@@ -1,93 +1,107 @@
 import { query } from "../persistencia/PostgreSQL/config.js";
 
-class NoteServices {
-  // Crear una nueva nota
-  async createNote(note) {
-    const { title, description, contacts, comments } = note;
+class NotesService {
+  // Crea una nueva nota
+  createNote = async (note) => {
+    const { title, description, created_at, is_completed, owner_id } = note;
     try {
-      const result = await query(
-        `
-      INSERT INTO notes (title, description, contacts, comments)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *;
-    `,
-        [title, description, contacts, comments]
+      const noteCreated = await query(
+        "INSERT INTO notes (title, description, created_at, is_completed, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+        [title, description, created_at, is_completed, owner_id]
       );
-
-      return result.rows[0];
-    } catch (error) {
-      return { error: true, data: error };
-    }
-  }
-  // Obtener todas las notas
-  async getAllNotes() {
-    try {
-      const result = await query(`
-      SELECT * FROM notes;
-    `);
-
-      return result.rows;
-    } catch (error) {
-      return { error: true, data: error };
-    }
-  }
-  // Obtener una nota por su ID
-  async getNoteById(nid) {
-    try {
-      const result = await query(
-        `
-          SELECT * FROM notes
-          WHERE id = $1;
-        `,
-        [nid]
-      );
-
-      return result.rows[0] || null;
-    } catch (error) {
-      return { error: true, data: error };
-    }
-  }
-
-  // Actualizar una nota por su ID
-  async updateNoteById(noteId, fieldToUpdate, newValue) {
-    try {
-      const result = await query(
-        `UPDATE notes SET ${fieldToUpdate} = $1 WHERE id = $2 RETURNING *`,
-        [newValue, nid]
-      );
-
-      if (result.rows.length === 0) {
-        return {
-          error: true,
-          message: `Nota con ID ${nid} no encontrada`,
-        };
-      }
-
-      return result.rows[0];
+      return noteCreated.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
-  }
+  };
 
-  // Eliminar una nota por su ID
-  async deleteNoteById(nid) {
+  // Obtiene todas las notas
+  getAllNotes = async () => {
     try {
-      const result = await query(
-        `
-      DELETE FROM notes
-      WHERE id = $1
-      RETURNING *;
-    `,
-        [nid]
-      );
-
-      return result.rows[0] || null;
-    } catch (error) {
-      return { error: true, data: error };
+      const data = await query("SELECT * FROM notes ");
+      const note = data.rows;
+      return note;
+    } catch (err) {
+      return { error: true, data: err };
     }
-  }
+  };
+  // Obtiene una nota por su ID
+  getNoteById = async (noteId) => {
+    try {
+      const data = await query("SELECT * FROM notes WHERE id = $1", [noteId]);
+      const note = data.rows[0];
+      return note;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+  // Actualiza una nota por su ID
+  updateNote = async (noteId, newInfo) => {
+    const { title, description, is_completed } = newInfo;
+    try {
+      const updatedNote = await query(
+        "UPDATE notes SET title = $2, description = $3, is_completed = $4 WHERE id = $1 RETURNING *",
+        [noteId, title, description, is_completed, owner_id]
+      );
+      return updatedNote.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Elimina una nota por su ID
+  deleteNote = async (noteId) => {
+    try {
+      const deletedNote = await query(
+        "DELETE FROM notes WHERE id = $1 RETURNING *",
+        [noteId]
+      );
+      return deletedNote.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Asigna un comentario a una nota
+  addComment = async (noteId, commentId) => {
+    try {
+      const commentAdded = await query(
+        "INSERT INTO note_comments (note_id, comment_id) VALUES ($1, $2) RETURNING *",
+        [noteId, commentId]
+      );
+      return commentAdded.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Obtiene todos los comentarios asociados a una nota
+  getComments = async (noteId) => {
+    try {
+      const data = await query(
+        "SELECT comments.* FROM comments JOIN note_comments ON comments.id = note_comments.comment_id WHERE note_comments.note_id = $1",
+        [noteId]
+      );
+      return data.rows;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Asigna un usuario como propietario de una nota
+  setOwner = async (noteId, ownerId) => {
+    try {
+      const ownerSet = await query(
+        "UPDATE notes SET owner_id = $2 WHERE id = $1 RETURNING *",
+        [noteId, ownerId]
+      );
+      return ownerSet.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
 }
 
-const noteServices = new NoteServices();
+const notesService = new NotesService();
 
-export default noteServices;
+export default notesService;

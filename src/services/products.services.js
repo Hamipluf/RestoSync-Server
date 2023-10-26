@@ -6,78 +6,77 @@ class ProductService {
   // Obtiene todos los productos
   getAllProducts = async () => {
     try {
-      const products = await query("SELECT * FROM products");
-      return products;
-    } catch (err) {
-      return { error: true, data: err };
-    }
-  };
-  // Obtiene un prducto dependiendo del user ID
-  getProductById = async (pid) => {
-    try {
-      const data = await query("SELECT * FROM products WHERE id = $1", [pid]);
-      const product = data.rows[0];
+      const data = await query("SELECT * FROM products");
+      const product = data.rows;
       return product;
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Crea un usuario
+
+  // Crea un nuevo producto
   createProduct = async (product) => {
-    const { title, description, stock, categories, price } = product;
+    const { title, description, price, stock_quantity, category, store_id } =
+      product;
     try {
       const productCreated = await query(
-        "INSERT INTO products (title, description, stock, categories, price) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [title, description, stock, categories, price]
+        "INSERT INTO products (title, description, price, stock_quantity, category, store_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [title, description, price, stock_quantity, category, store_id]
       );
       return productCreated.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Elimina un producto por ID
-  deleteProduct = async (pid) => {
+
+  // Obtiene un producto por su ID
+  getProductById = async (productId) => {
     try {
-      const data = await query("DELETE * FROM products WHERE id = $1", [pid]);
+      const data = await query("SELECT * FROM products WHERE id = $1", [
+        productId,
+      ]);
       const product = data.rows[0];
       return product;
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Actualiza un campo del producto por ID
-  updateProductField = async (pid, fieldToUpdate, newValue) => {
+
+  // Actualiza un producto por su ID
+  updateProduct = async (productId, newInfo) => {
+    const { title, description, price, stock_quantity, category, store_id } =
+      newInfo;
     try {
-      const result = await query(
-        `UPDATE products SET ${fieldToUpdate} = $1 WHERE id = $2 RETURNING *`,
-        [newValue, pid]
+      const updatedProduct = await query(
+        "UPDATE products SET title = $2, description = $3, price = $4, stock_quantity = $5, category = $6, store_id = $7 WHERE id = $1 RETURNING *",
+        [
+          productId,
+          title,
+          description,
+          price,
+          stock_quantity,
+          category,
+          store_id,
+        ]
       );
-
-      if (result.rows.length === 0) {
-        return {
-          error: true,
-          message: `Producto con ID ${productId} no encontrado`,
-        };
-      }
-
-      return result.rows[0];
+      return updatedProduct.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Eliminar un producto por ID
-  async deleteProduct(pid) {
-    if (!pid) {
-      return { error: true, message: "Falta el ID del producto a eliminar." };
-    }
+
+  // Elimina un producto por su ID
+  deleteProduct = async (productId) => {
     try {
-      const deletedProduct = await productService.deleteProduct(pid);
-      return deletedProduct;
+      const deletedProduct = await query(
+        "DELETE FROM products WHERE id = $1 RETURNING *",
+        [productId]
+      );
+      return deletedProduct.rows[0];
     } catch (err) {
-      console.log("ERROR deleteProduct product.postgres", err);
       return { error: true, data: err };
     }
-  }
+  };
 }
 
 const productService = new ProductService();

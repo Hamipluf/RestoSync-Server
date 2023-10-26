@@ -44,21 +44,21 @@ export const getAllProducts = async (req, res) => {
 };
 // Obtener un producto por ID
 export const getProductById = async (req, res) => {
-  const { id } = req.params;
+  const { pid } = req.params;
   if (req.method !== "GET") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  if (!id) {
+  if (!pid) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "Falta el ID del producto"));
   }
 
   try {
-    const product = await productManager.getProductById(id);
+    const product = await productManager.getProductById(parseInt(pid));
 
     if ("error" in product) {
       return res
@@ -84,10 +84,19 @@ export const createProduct = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const productData = req.body;
+  const { title, description, stock_quantity, category, price } = req.body;
+  if (!title || !stock_quantity || !price) {
+    return { error: true, message: "Faltan campos a completar." };
+  }
 
   try {
-    const createdProduct = await productManager.createProduct(productData);
+    const createdProduct = await productManager.createProduct({
+      title,
+      description,
+      stock_quantity,
+      category,
+      price,
+    });
 
     if ("error" in createdProduct) {
       return res
@@ -119,10 +128,10 @@ export const updateProductField = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { id } = req.params;
-  const { fieldToUpdate, newValue } = req.body;
+  const { pid } = req.params;
+  const { newInfo } = req.body;
 
-  if (!id || !fieldToUpdate || newValue === undefined) {
+  if (!pid || !newInfo) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "Faltan campos a completar"));
@@ -130,9 +139,8 @@ export const updateProductField = async (req, res) => {
 
   try {
     const updatedProduct = await productManager.updateProductField(
-      id,
-      fieldToUpdate,
-      newValue
+      parseInt(pid),
+      newInfo
     );
 
     if ("error" in updatedProduct) {
@@ -165,9 +173,9 @@ export const deleteProduct = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { id } = req.params;
+  const { pid } = req.params;
 
-  if (!id) {
+  if (!pid) {
     return res
       .status(400)
       .json(
@@ -176,7 +184,7 @@ export const deleteProduct = async (req, res) => {
   }
 
   try {
-    const deletedProduct = await productManager.deleteProduct(id);
+    const deletedProduct = await productManager.deleteProduct(parseInt(pid));
 
     if ("error" in deletedProduct) {
       return res

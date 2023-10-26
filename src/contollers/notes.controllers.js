@@ -1,17 +1,19 @@
-import noteManager from "../persistencia/DAOs/notes.postgresql.js";
 import customResponses from "../utils/customResponses.js";
+import NotesManager from "../persistencia/DAOs/notes.postgresql.js";
 
-// Obtener todas las notas
+const notesManager = new NotesManager();
+
+// Obtiene todas las notas
 export const getAllNotes = async (req, res) => {
   if (req.method !== "GET") {
-    return res
+    res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
   try {
-    const notes = await noteManager.getAllNotes();
-    if (Array.isArray(notes) && notes.length === 0) {
+    const notes = await notesManager.getAllNotes();
+    if (notes.length === 0) {
       return res
         .status(404)
         .json(customResponses.badResponse(404, "No hay notas para devolver"));
@@ -28,39 +30,58 @@ export const getAllNotes = async (req, res) => {
           )
         );
     }
+
+    // Eliminar espacios en blanco sobrantes de las propiedades de cada nota
+    const formattedNotes = notes.map((note) => {
+      for (const key in note) {
+        if (typeof note[key] === "string") {
+          note[key] = note[key].trim();
+        }
+      }
+      return note;
+    });
+
     res
       .status(200)
-      .json(customResponses.responseOk(200, "Notas encontradas", notes));
+      .json(
+        customResponses.responseOk(200, "Notas encontradas", formattedNotes)
+      );
   } catch (error) {
-    console.error("Error al obtener notas:", error);
+    console.error("Error al obtener las notas:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Obtener una nota por ID
+// Obtiene una nota por su ID
 export const getNoteById = async (req, res) => {
   const { id } = req.params;
+
   if (req.method !== "GET") {
-    return res
+    res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
   if (!id) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Falta el ID de la nota"));
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Falta el ID de la nota."));
   }
 
   try {
-    const note = await noteManager.getNoteById(id);
+    const note = await notesManager.getNoteById(parseInt(id));
 
     if ("error" in note) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, note.message));
+    }
+
+    for (const key in note) {
+      if (typeof note[key] === "string") {
+        note[key] = note[key].trim();
+      }
     }
 
     res
@@ -73,30 +94,38 @@ export const getNoteById = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Crear una nota
-export const createNote = async (req, res) => {
+// Agrega una nueva nota
+export const addNote = async (req, res) => {
   if (req.method !== "POST") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const noteData = req.body;
+  const { title, description, is_completed, owner_id } = req.body;
+
+  if (!title || !description || !is_completed || !owner_id) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Faltan campos a completar."));
+  }
+  const noteData = {
+    ...req.body,
+    created_at: new Date(),
+  };
 
   try {
-    const createdNote = await noteManager.createNote(noteData);
-    if ("error" in createdNote) {
+    const newNote = await notesManager.addNote(noteData);
+
+    if ("error" in newNote) {
       return res
         .status(400)
-        .json(customResponses.badResponse(400, createdNote.message));
+        .json(customResponses.badResponse(400, newNote.message));
     }
 
     res
       .status(201)
-      .json(
-        customResponses.responseOk(201, "Nota creada con éxito", createdNote)
-      );
+      .json(customResponses.responseOk(201, "Nota creada con éxito", newNote));
   } catch (error) {
     console.error("Error al crear la nota:", error);
     return res
@@ -104,30 +133,25 @@ export const createNote = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Actualiza una nota por su ID
+export const updateNote = async (req, res) => {
+  const { id } = req.params;
+  const { title, description, is_completed } = req.body;
 
-// Actualizar un campo de la nota por ID
-export const updateNoteField = async (req, res) => {
   if (req.method !== "PUT") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { id } = req.params;
-  const { fieldToUpdate, newValue } = req.body;
-
-  if (!id || !fieldToUpdate || newValue === undefined) {
+  if (!title || !description || !is_completed) {
     return res
       .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+      .json(customResponses.badResponse(400, "Faltan campos a completar."));
   }
 
   try {
-    const updatedNote = await noteManager.updateNoteField(
-      id,
-      fieldToUpdate,
-      newValue
-    );
+    const updatedNote = await notesManager.updateNote(id, req.body);
 
     if ("error" in updatedNote) {
       return res
@@ -151,27 +175,18 @@ export const updateNoteField = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Eliminar una nota por ID
+// Elimina una nota por su ID
 export const deleteNote = async (req, res) => {
+  const { id } = req.params;
+
   if (req.method !== "DELETE") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { id } = req.params;
-
-  if (!id) {
-    return res
-      .status(400)
-      .json(
-        customResponses.badResponse(400, "Falta el ID de la nota a eliminar")
-      );
-  }
-
   try {
-    const deletedNote = await noteManager.deleteNoteById(id);
+    const deletedNote = await notesManager.deleteNote(parseInt(id));
 
     if ("error" in deletedNote) {
       return res
@@ -186,6 +201,128 @@ export const deleteNote = async (req, res) => {
       );
   } catch (error) {
     console.error("Error al eliminar la nota:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Asigna un comentario a una nota
+export const assignCommentToNote = async (req, res) => {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+
+  const { note_id, comment_id } = req.body;
+
+  if (!note_id || !comment_id) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Faltan campos a completar."));
+  }
+
+  try {
+    const commentAssigned = await notesManager.assignCommentToNote(
+      note_id,
+      comment_id
+    );
+
+    if ("error" in commentAssigned) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, commentAssigned.message));
+    }
+
+    res
+      .status(201)
+      .json(
+        customResponses.responseOk(
+          201,
+          "Comentario asignado a la nota con éxito",
+          commentAssigned
+        )
+      );
+  } catch (error) {
+    console.error("Error al asignar un comentario a la nota:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Obtiene todos los comentarios asociados a una nota por su ID
+export const getCommentsForNote = async (req, res) => {
+  const { id } = req.params;
+
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!id) {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Falta el ID de la nota"));
+  }
+
+  try {
+    const comments = await notesManager.getCommentsForNote(parseInt(id));
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(
+          200,
+          "Comentarios encontrados para la nota",
+          comments
+        )
+      );
+  } catch (error) {
+    console.error("Error al obtener los comentarios para la nota:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Asigna un usuario como propietario de una nota
+export const assignOwnerToNote = async (req, res) => {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+
+  const { note_id, owner_id } = req.body;
+
+  if (!note_id || !owner_id) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Faltan campos a completar."));
+  }
+
+  try {
+    const ownerAssigned = await notesManager.assignOwnerToNote(note_id, owner_id);
+
+    if ("error" in ownerAssigned) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, ownerAssigned.message));
+    }
+
+    res
+      .status(201)
+      .json(
+        customResponses.responseOk(
+          201,
+          "Usuario asignado como propietario de la nota con éxito",
+          ownerAssigned
+        )
+      );
+  } catch (error) {
+    console.error(
+      "Error al asignar un usuario como propietario de la nota:",
+      error
+    );
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
