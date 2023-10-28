@@ -1,45 +1,95 @@
 import customResponses from "../utils/customResponses.js";
-import StoresManager from "../persistencia/DAOs/stores.postresql.js";
+import StoreManager from "../persistencia/DAOs/stores.postresql.js";
 
-const storeManager = new StoresManager();
+const storeManager = new StoreManager();
 
-// Obtener una tienda por su ID
-export const getStoreById = async (req, res) => {
+// Obtener todas las tiendas
+export const getAllStores = async (req, res) => {
   if (req.method !== "GET") {
-    return res
+    res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
+  try {
+    const stores = await storeManager.getAllStores();
+    if (stores.length === 0) {
+      return res
+        .status(404)
+        .json(customResponses.badResponse(404, "No hay tiendas para devolver"));
+    }
 
-  const { storeId } = req.params;
+    if ("error" in stores) {
+      return res
+        .status(400)
+        .json(
+          customResponses.badResponse(
+            400,
+            "Error en obtener datos",
+            stores.message
+          )
+        );
+    }
 
-  if (!storeId) {
+    // Eliminar espacios en blanco sobrantes de las propiedades de cada tienda
+    const formattedStores = stores.map((store) => {
+      for (const key in store) {
+        if (typeof store[key] === "string") {
+          store[key] = store[key].trim();
+        }
+      }
+      return store;
+    });
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(200, "Tiendas encontradas", formattedStores)
+      );
+  } catch (error) {
+    console.error("Error al obtener los registros:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Obtener una tienda por su ID
+export const getStoreById = async (req, res) => {
+  const { id } = req.params;
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!id) {
     return res
       .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+      .json(customResponses.badResponse(400, "Falta el ID de la tienda"));
   }
-
   try {
-    const store = await storeManager.getStoreById(storeId);
-
+    const store = await storeManager.getStoreById(parseInt(id));
     if ("error" in store) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, store.message));
     }
 
+    for (const key in store) {
+      if (typeof store[key] === "string") {
+        store[key] = store[key].trim();
+      }
+    }
+
     res
       .status(200)
       .json(customResponses.responseOk(200, "Tienda encontrada", store));
   } catch (error) {
-    console.error("Error al obtener la tienda:", error);
+    console.error("Error al obtener los registros:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Crear una nueva tienda
+// Registrar una tienda
 export const createStore = async (req, res) => {
   if (req.method !== "POST") {
     return res
@@ -47,8 +97,8 @@ export const createStore = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
+  // Recibir y validar los datos de la nueva tienda desde req.body
   const { name, company_name, address, cuit, owner_id } = req.body;
-
   if (!name || !company_name || !address || !cuit || !owner_id) {
     return res
       .status(400)
@@ -56,13 +106,7 @@ export const createStore = async (req, res) => {
   }
 
   try {
-    const newStore = await storeManager.addStore({
-      name,
-      company_name,
-      address,
-      cuit,
-      ownerId,
-    });
+    const newStore = await storeManager.createStore(req.body);
 
     if ("error" in newStore) {
       return res
@@ -73,45 +117,40 @@ export const createStore = async (req, res) => {
     res
       .status(201)
       .json(
-        customResponses.responseOk(201, "Tienda creada con éxito", newStore)
+        customResponses.responseOk(201, "Tienda registrada con éxito", newStore)
       );
   } catch (error) {
-    console.error("Error al crear la tienda:", error);
+    console.error("Error al registrar la tienda:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
 // Actualizar una tienda por su ID
-export const updateStore = async (req, res) => {
+export const updateStoreById = async (req, res) => {
+  const { id } = req.params;
   if (req.method !== "PUT") {
-    return res
+    res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  const { storeId } = req.params;
-  if (!storeId) {
+  if (!id) {
     return res
       .status(400)
-      .json(customResponses.badResponse(400, "Falta el ID del store"));
+      .json(customResponses.badResponse(400, "Falta el ID de la tienda"));
   }
-  const { name, company_name, address, cuit } = req.body;
-
-  if (!name || !company_name || !address || !cuit) {
+  const { name, company_name, address, cuit, owner_id } = req.body;
+  if (!name || !company_name || !address || !cuit || !owner_id) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "Faltan campos a completar"));
   }
 
   try {
-    const updatedStore = await storeManager.updateStore(storeId, {
-      name,
-      company_name,
-      address,
-      cuit,
-    });
+    const updatedStore = await storeManager.updateStoreById(
+      parseInt(id),
+      req.body
+    );
 
     if ("error" in updatedStore) {
       return res
@@ -135,25 +174,21 @@ export const updateStore = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
 // Eliminar una tienda por su ID
-export const deleteStore = async (req, res) => {
+export const deleteStoreById = async (req, res) => {
+  const { id } = req.params;
   if (req.method !== "DELETE") {
-    return res
+    res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  const { storeId } = req.params;
-
-  if (!storeId) {
+  if (!id) {
     return res
       .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+      .json(customResponses.badResponse(400, "Falta el ID de la tienda"));
   }
-
   try {
-    const deletedStore = await storeManager.deleteStore(storeId);
+    const deletedStore = await storeManager.deleteStoreById(parseInt(id));
 
     if ("error" in deletedStore) {
       return res
@@ -163,7 +198,13 @@ export const deleteStore = async (req, res) => {
 
     res
       .status(200)
-      .json(customResponses.responseOk(200, "Tienda eliminada con éxito"));
+      .json(
+        customResponses.responseOk(
+          200,
+          "Tienda eliminada con éxito",
+          deletedStore
+        )
+      );
   } catch (error) {
     console.error("Error al eliminar la tienda:", error);
     return res
@@ -171,163 +212,123 @@ export const deleteStore = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Asignar un manager a una tienda
-export const assignManagerToStore = async (req, res) => {
-  if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json(customResponses.badResponse(405, "Método no permitido"));
-  }
-
-  const { store_id, manager_id } = req.body;
-
-  if (!store_id || !manager_id) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
-  }
-
-  try {
-    const managerAssigned = await storeManager.assignManagerToStore(
-      store_id,
-      manager_id
-    );
-
-    if ("error" in managerAssigned) {
-      return res
-        .status(400)
-        .json(customResponses.badResponse(400, managerAssigned.message));
-    }
-
-    res
-      .status(201)
-      .json(
-        customResponses.responseOk(
-          201,
-          "Manager asignado con éxito",
-          managerAssigned
-        )
-      );
-  } catch (error) {
-    console.error("Error al asignar un manager a la tienda:", error);
-    return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
-  }
-};
-
-// Obtener los managers de una tienda
-export const getManagersForStore = async (req, res) => {
+// Obtener los productos de una tienda por su ID
+export const getProductsByStore = async (req, res) => {
+  const { id } = req.params;
   if (req.method !== "GET") {
-    return res
-      .status(405)
-      .json(customResponses.badResponse(405, "Método no permitido"));
-  }
-
-  const { store_id } = req.params;
-
-  if (!store_id) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
-  }
-
-  try {
-    const managers = await storeManager.getManagersForStore(parseInt(store_id));
-
-    if ("error" in managers) {
-      return res
-        .status(400)
-        .json(customResponses.badResponse(400, managers.message));
-    }
-
     res
-      .status(200)
-      .json(customResponses.responseOk(200, "Managers encontrados", managers));
-  } catch (error) {
-    console.error("Error al obtener los managers de la tienda:", error);
-    return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
-  }
-};
-
-// Agregar un producto a una tienda
-export const addProductToStore = async (req, res) => {
-  if (req.method !== "POST") {
-    return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  const { store_id, product_id } = req.body;
-
-  if (!store_id || !product_id) {
+  if (!id) {
     return res
       .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+      .json(customResponses.badResponse(400, "Falta el ID de la tienda"));
   }
-
   try {
-    const productAdded = await storeManager.addProductToStore(
-      store_id,
-      product_id
-    );
-
-    if ("error" in productAdded) {
+    const products = await storeManager.getProducts(parseInt(id));
+    if (products.length === 0) {
       return res
-        .status(400)
-        .json(customResponses.badResponse(400, productAdded.message));
+        .status(404)
+        .json(
+          customResponses.badResponse(404, "No hay productos para esta tienda")
+        );
     }
-
-    res
-      .status(201)
-      .json(
-        customResponses.responseOk(
-          201,
-          "Producto agregado a la tienda con éxito",
-          productAdded
-        )
-      );
-  } catch (error) {
-    console.error("Error al agregar un producto a la tienda:", error);
-    return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
-  }
-};
-
-// Obtener los productos de una tienda
-export const getProductsForStore = async (req, res) => {
-  if (req.method !== "GET") {
-    return res
-      .status(405)
-      .json(customResponses.badResponse(405, "Método no permitido"));
-  }
-
-  const { store_id } = req.params;
-
-  if (!store_id) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
-  }
-
-  try {
-    const products = await storeManager.getProductsForStore(parseInt(store_id));
 
     if ("error" in products) {
       return res
         .status(400)
-        .json(customResponses.badResponse(400, products.message));
+        .json(
+          customResponses.badResponse(
+            400,
+            "Error en obtener datos",
+            products.message
+          )
+        );
     }
+
+    // Eliminar espacios en blanco sobrantes de las propiedades de cada producto
+    const formattedProducts = products.map((product) => {
+      for (const key in product) {
+        if (typeof product[key] === "string") {
+          product[key] = product[key].trim();
+        }
+      }
+      return product;
+    });
 
     res
       .status(200)
-      .json(customResponses.responseOk(200, "Productos encontrados", products));
+      .json(
+        customResponses.responseOk(
+          200,
+          "Productos encontrados",
+          formattedProducts
+        )
+      );
   } catch (error) {
     console.error("Error al obtener los productos de la tienda:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Obtener los empleados de una tienda por su ID
+export const getEmployeesByStoreId = async (req, res) => {
+  const { id } = req.params;
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!id) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Falta el ID de la tienda"));
+  }
+  try {
+    const employees = await storeManager.getEmployees(parseInt(id));
+    if (employees.length === 0) {
+      return res
+        .status(404)
+        .json(
+          customResponses.badResponse(404, "No hay empleados para esta tienda")
+        );
+    }
+
+    if ("error" in employees) {
+      return res
+        .status(400)
+        .json(
+          customResponses.badResponse(
+            400,
+            "Error en obtener datos",
+            employees.message
+          )
+        );
+    }
+
+    // Eliminar espacios en blanco sobrantes de las propiedades de cada empleado
+    const formattedEmployees = employees.map((employee) => {
+      for (const key in employee) {
+        if (typeof employee[key] === "string") {
+          employee[key] = employee[key].trim();
+        }
+      }
+      return employee;
+    });
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(
+          200,
+          "Empleados encontrados",
+          formattedEmployees
+        )
+      );
+  } catch (error) {
+    console.error("Error al obtener los empleados de la tienda:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));

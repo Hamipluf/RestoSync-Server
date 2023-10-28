@@ -1,15 +1,17 @@
 import { query } from "../persistencia/PostgreSQL/config.js";
 
 class CommentsService {
-  // Crea un nuevo comentario
-  createComment = async (comment) => {
-    const { body, user_id, created_at, updated_at } = comment;
+  constructor(model) {
+    this.model = model;
+  }
+  // Obtiene todos los comentarios de un usuario
+  getAllCommentsByUserId = async (userId) => {
     try {
-      const commentCreated = await query(
-        "INSERT INTO comments (body, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING *",
-        [body, user_id, created_at, updated_at]
+      const comments = await query(
+        "SELECT * FROM comments WHERE user_id = $1",
+        [userId]
       );
-      return commentCreated.rows[0];
+      return comments.rows;
     } catch (err) {
       return { error: true, data: err };
     }
@@ -27,26 +29,30 @@ class CommentsService {
       return { error: true, data: err };
     }
   };
-  // Obtiene todos los comentarios
-  getAllComments = async () => {
+
+  // Crea un nuevo comentario para un usuario
+  createComment = async (userId, comment) => {
+    const { body } = comment;
     try {
-      const data = await query("SELECT * FROM comments ");
-      const comment = data.rows;
-      return comment;
+      const commentCreated = await query(
+        "INSERT INTO comments (body, user_id) VALUES ($1, $2) RETURNING *",
+        [body, userId]
+      );
+      return commentCreated.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
   };
 
-  // Actualiza un comentario por su ID
-  updateComment = async (commentId, newInfo) => {
-    const { body, user_id, updated_at } = newInfo;
+  // Actualiza un comentario existente
+  updateComment = async (commentId, updatedComment) => {
+    const { body } = updatedComment;
     try {
-      const updatedComment = await query(
-        "UPDATE comments SET body = $2, user_id = $3, updated_at = $4 WHERE id = $1 RETURNING *",
-        [commentId, body, user_id, updated_at]
+      const commentUpdated = await query(
+        "UPDATE comments SET body = $1 WHERE id = $2 RETURNING *",
+        [body, commentId]
       );
-      return updatedComment.rows[0];
+      return commentUpdated.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
@@ -55,17 +61,31 @@ class CommentsService {
   // Elimina un comentario por su ID
   deleteComment = async (commentId) => {
     try {
-      const deletedComment = await query(
+      const commentDeleted = await query(
         "DELETE FROM comments WHERE id = $1 RETURNING *",
         [commentId]
       );
-      return deletedComment.rows[0];
+      return commentDeleted.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Obtiene el usuario que realizó un comentario
+  getCommentUser = async (commentId) => {
+    try {
+      const data = await query(
+        "SELECT u.* FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = $1",
+        [commentId]
+      );
+      const user = data.rows[0];
+      return user;
     } catch (err) {
       return { error: true, data: err };
     }
   };
 }
 
-const commentService = new CommentsService();
+const commentsService = new CommentsService();
 
-export default commentService;
+export default commentsService;

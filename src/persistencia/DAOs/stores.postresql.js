@@ -1,132 +1,102 @@
-import storesServices from "../../services/store.services.js";
+import storesService from "../../services/store.services.js";
 
-export default class StoresManager {
+export default class StoreManager {
+  // Obtiene todas las tiendas
+  async getAllStores() {
+    try {
+      const data = await storesService.getAllStores();
+      const stores = data ? data : { error: true, message: "No hay tiendas" };
+      return stores;
+    } catch (err) {
+      console.log("ERROR getAllStores stores.postgres", err);
+      return { error: true, data: err };
+    }
+  }
   // Obtiene una tienda por su ID
   async getStoreById(storeId) {
-    if (!storeId) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
     try {
-      const store = await storesServices.getStoreById(storeId);
+      const store = await storesService.getStoreById(storeId);
       return store
         ? store
-        : { error: true, message: `No hay una tienda con el id ${storeId}` };
+        : { error: true, message: `No hay una tienda con el ID ${storeId}` };
     } catch (err) {
       console.log("ERROR getStoreById stores.postgres", err);
       return { error: true, data: err };
     }
   }
+  // Registra una nueva tienda
+  async registerStore(store) {
+    const { name, company_name, address, cuit, owner_id } = store;
 
-  // Agrega una nueva tienda
-  async addStore(store) {
-    if (!store) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
     try {
-      const newStore = await storesServices.createStore(store);
-      return newStore.error
-        ? { error: true, message: newStore.data }
-        : newStore.rows[0];
+      const storeData = { name, company_name, address, cuit, owner_id };
+      const newStore = await storesService.createStore(storeData);
+      let response;
+      newStore.error
+        ? (response = { error: true, message: newStore.data })
+        : (response = newStore);
+      return response;
     } catch (err) {
-      console.log("ERROR addStore stores.postgres", err);
+      console.log("ERROR registerStore stores.postgres", err);
       return { error: true, data: err };
     }
   }
-
-  // Actualiza una tienda por su ID
-  async updateStore(storeId, newInfo) {
-    if (!storeId || !newInfo) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
+  // Actualiza una tienda existente
+  async updateStore(storeId, updatedStore) {
     try {
-      const updatedStore = await storesServices.updateStore(storeId, newInfo);
-      return updatedStore.error
-        ? { error: true, message: updatedStore.data }
-        : updatedStore.rows[0];
+      const storeData = updatedStore;
+      const updated = await storesService.updateStore(storeId, storeData);
+      let response;
+      updated.error
+        ? (response = { error: true, message: updated.data })
+        : (response = updated);
+      return response;
     } catch (err) {
       console.log("ERROR updateStore stores.postgres", err);
       return { error: true, data: err };
     }
   }
-
   // Elimina una tienda por su ID
   async deleteStore(storeId) {
-    if (!storeId) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
     try {
-      const deletedStore = await storesServices.deleteStore(storeId);
-      return deletedStore.error
-        ? { error: true, message: deletedStore.data }
-        : deletedStore.rows[0];
+      const deleted = await storesService.deleteStore(storeId);
+      let response;
+      deleted.error
+        ? (response = { error: true, message: deleted.data })
+        : (response = deleted);
+      return response;
     } catch (err) {
       console.log("ERROR deleteStore stores.postgres", err);
       return { error: true, data: err };
     }
   }
-
-  // Asigna un manager a una tienda
-  async assignManagerToStore(store_id, manager_id) {
-    if (!store_id || !manager_id) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
-    try {
-      const managerAssigned = await storesServices.assignManager(
-        store_id,
-        manager_id
-      );
-      return managerAssigned.error
-        ? { error: true, message: managerAssigned.data }
-        : managerAssigned.rows[0];
-    } catch (err) {
-      console.log("ERROR assignManagerToStore stores.postgres", err);
-      return { error: true, data: err };
-    }
-  }
-
-  // Obtiene los managers de una tienda
-  async getManagersForStore(store_id) {
-    if (!store_id) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
-    try {
-      const data = await storesServices.getStoreManagers(store_id);
-      return data.rows;
-    } catch (err) {
-      console.log("ERROR getManagersForStore stores.postgres", err);
-      return { error: true, data: err };
-    }
-  }
-
-  // Agrega un producto a una tienda
-  async addProductToStore(store_id, product_id) {
-    if (!store_id || !product_id) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
-    try {
-      const productAdded = await storesServices.addProduct(
-        store_id,
-        product_id
-      );
-      return productAdded.error
-        ? { error: true, message: productAdded.data }
-        : productAdded.rows[0];
-    } catch (err) {
-      console.log("ERROR addProductToStore stores.postgres", err);
-      return { error: true, data: err };
-    }
-  }
-
   // Obtiene los productos de una tienda
-  async getProductsForStore(store_id) {
-    if (!store_id) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
+  async getProducts(storeId) {
     try {
-      const data = await storesServices.getProducts(store_id);
-      return data.rows;
+      const products = await storesService.getStoreProducts(storeId);
+      return products
+        ? products
+        : {
+            error: true,
+            message: `No se encontró ningn producto de la tienda con el ID ${storeId}`,
+          };
     } catch (err) {
-      console.log("ERROR getProductsForStore stores.postgres", err);
+      console.log("ERROR getProducts stores.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Obtiene los empleados de una tienda
+  async getEmployees(storeId) {
+    try {
+      const employee = await storesService.getStoreEmployees(storeId);
+      return employee
+        ? employee
+        : {
+            error: true,
+            message: `No se encontró ningn empleado de la tienda con el ID ${storeId}`,
+          };
+    } catch (err) {
+      console.log("ERROR getEmployees stores.postgres", err);
       return { error: true, data: err };
     }
   }

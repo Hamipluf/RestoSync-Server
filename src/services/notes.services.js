@@ -1,30 +1,19 @@
 import { query } from "../persistencia/PostgreSQL/config.js";
 
 class NotesService {
-  // Crea una nueva nota
-  createNote = async (note) => {
-    const { title, description, created_at, is_completed, owner_id } = note;
+  constructor(model) {
+    this.model = model;
+  }
+  // Obtiene todas las notas
+  getAllNotes = async () => {
     try {
-      const noteCreated = await query(
-        "INSERT INTO notes (title, description, created_at, is_completed, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [title, description, created_at, is_completed, owner_id]
-      );
-      return noteCreated.rows[0];
+      const notes = await query("SELECT * FROM notes");
+      return notes.rows;
     } catch (err) {
       return { error: true, data: err };
     }
   };
 
-  // Obtiene todas las notas
-  getAllNotes = async () => {
-    try {
-      const data = await query("SELECT * FROM notes ");
-      const note = data.rows;
-      return note;
-    } catch (err) {
-      return { error: true, data: err };
-    }
-  };
   // Obtiene una nota por su ID
   getNoteById = async (noteId) => {
     try {
@@ -35,15 +24,30 @@ class NotesService {
       return { error: true, data: err };
     }
   };
-  // Actualiza una nota por su ID
-  updateNote = async (noteId, newInfo) => {
-    const { title, description, is_completed } = newInfo;
+
+  // Crea una nueva nota
+  createNote = async (note) => {
+    const { title, description, owner_id, is_completed } = note;
     try {
-      const updatedNote = await query(
-        "UPDATE notes SET title = $2, description = $3, is_completed = $4 WHERE id = $1 RETURNING *",
-        [noteId, title, description, is_completed, owner_id]
+      const noteCreated = await query(
+        "INSERT INTO notes (title, description, owner_id, is_completed) VALUES ($1, $2, $3, $4) RETURNING *",
+        [title, description, owner_id, is_completed]
       );
-      return updatedNote.rows[0];
+      return noteCreated.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Actualiza una nota existente
+  updateNote = async (noteId, updatedNote) => {
+    const { title, description, is_completed } = updatedNote;
+    try {
+      const noteUpdated = await query(
+        "UPDATE notes SET title = $1, description = $2, is_completed = $3 WHERE id = $4 RETURNING *",
+        [title, description, is_completed, noteId]
+      );
+      return noteUpdated.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
@@ -52,50 +56,25 @@ class NotesService {
   // Elimina una nota por su ID
   deleteNote = async (noteId) => {
     try {
-      const deletedNote = await query(
+      const noteDeleted = await query(
         "DELETE FROM notes WHERE id = $1 RETURNING *",
         [noteId]
       );
-      return deletedNote.rows[0];
+      return noteDeleted.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
   };
 
-  // Asigna un comentario a una nota
-  addComment = async (noteId, commentId) => {
-    try {
-      const commentAdded = await query(
-        "INSERT INTO note_comments (note_id, comment_id) VALUES ($1, $2) RETURNING *",
-        [noteId, commentId]
-      );
-      return commentAdded.rows[0];
-    } catch (err) {
-      return { error: true, data: err };
-    }
-  };
-
-  // Obtiene todos los comentarios asociados a una nota
-  getComments = async (noteId) => {
+  // Obtiene el propietario de una nota
+  getNoteOwner = async (noteId) => {
     try {
       const data = await query(
-        "SELECT comments.* FROM comments JOIN note_comments ON comments.id = note_comments.comment_id WHERE note_comments.note_id = $1",
+        "SELECT u.* FROM notes n JOIN users u ON n.owner_id = u.id WHERE n.id = $1",
         [noteId]
       );
-      return data.rows;
-    } catch (err) {
-      return { error: true, data: err };
-    }
-  };
-
-  // Asigna un usuario como propietario de una nota
-  setOwner = async (noteId, ownerId) => {
-    try {
-      const ownerSet = await query(
-        "UPDATE notes SET owner_id = $2 WHERE id = $1 RETURNING *",
-        [noteId, ownerId]
-      );
-      return ownerSet.rows[0];
+      const owner = data.rows[0];
+      return owner;
     } catch (err) {
       return { error: true, data: err };
     }

@@ -1,34 +1,22 @@
 import { query } from "../persistencia/PostgreSQL/config.js";
-class ProductService {
+
+class ProductsService {
   constructor(model) {
     this.model = model;
   }
-  // Obtiene todos los productos
-  getAllProducts = async () => {
-    try {
-      const data = await query("SELECT * FROM products");
-      const product = data.rows;
-      return product;
-    } catch (err) {
-      return { error: true, data: err };
-    }
-  };
 
-  // Crea un nuevo producto
-  createProduct = async (product) => {
-    const { title, description, price, stock_quantity, category, store_id } =
-      product;
+  // Obtiene todos los productos de una tienda
+  getAllProductsOfStore = async (storeId) => {
     try {
-      const productCreated = await query(
-        "INSERT INTO products (title, description, price, stock_quantity, category, store_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-        [title, description, price, stock_quantity, category, store_id]
+      const products = await query(
+        "SELECT * FROM products WHERE store_id = $1",
+        [storeId]
       );
-      return productCreated.rows[0];
+      return products.rows;
     } catch (err) {
       return { error: true, data: err };
     }
   };
-
   // Obtiene un producto por su ID
   getProductById = async (productId) => {
     try {
@@ -41,25 +29,29 @@ class ProductService {
       return { error: true, data: err };
     }
   };
-
-  // Actualiza un producto por su ID
-  updateProduct = async (productId, newInfo) => {
-    const { title, description, price, stock_quantity, category, store_id } =
-      newInfo;
+  // Crea un nuevo producto en una tienda
+  createProduct = async (storeId, product) => {
+    const { title, description, price, stock_quantity, category } = product;
     try {
-      const updatedProduct = await query(
-        "UPDATE products SET title = $2, description = $3, price = $4, stock_quantity = $5, category = $6, store_id = $7 WHERE id = $1 RETURNING *",
-        [
-          productId,
-          title,
-          description,
-          price,
-          stock_quantity,
-          category,
-          store_id,
-        ]
+      const productCreated = await query(
+        "INSERT INTO products (title, description, price, stock_quantity, category, store_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [title, description, price, stock_quantity, category, storeId]
       );
-      return updatedProduct.rows[0];
+      return productCreated.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+  // Actualiza un producto existente
+  updateProduct = async (productId, updatedProduct) => {
+    const { title, description, price, stock_quantity, category } =
+      updatedProduct;
+    try {
+      const productUpdated = await query(
+        "UPDATE products SET title = $1, description = $2, price = $3, stock_quantity = $4, category = $5 WHERE id = $6 RETURNING *",
+        [title, description, price, stock_quantity, category, productId]
+      );
+      return productUpdated.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
@@ -68,17 +60,31 @@ class ProductService {
   // Elimina un producto por su ID
   deleteProduct = async (productId) => {
     try {
-      const deletedProduct = await query(
+      const productDeleted = await query(
         "DELETE FROM products WHERE id = $1 RETURNING *",
         [productId]
       );
-      return deletedProduct.rows[0];
+      return productDeleted.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Obtiene la tienda a la que pertenece un producto
+  getProductStore = async (productId) => {
+    try {
+      const data = await query(
+        "SELECT s.* FROM products p JOIN stores s ON p.store_id = s.id WHERE p.id = $1",
+        [productId]
+      );
+      const store = data.rows[0];
+      return store;
     } catch (err) {
       return { error: true, data: err };
     }
   };
 }
 
-const productService = new ProductService();
+const productsService = new ProductsService();
 
-export default productService;
+export default productsService;
