@@ -1,38 +1,30 @@
-// import express from "express";
-// import {
-//   addNote,
-//   assignCommentToNote,
-//   assignOwnerToNote,
-//   deleteNote,
-//   getAllNotes,
-//   getCommentsForNote,
-//   getNoteById,
-//   updateNote,
-// } from "../contollers/notes.controllers.js";
+import express from "express";
+import {
+  createNote,
+  deleteNoteById,
+  getAllNotes,
+  getNoteById,
+  getOwnerNote,
+  updateNoteById,
+} from "../contollers/notes.controllers.js";
 
-// const router = express.Router();
-// // Obtiene todas las notas
-// router.get("/", getAllNotes);
+const router = express.Router();
+// Obtener todas las notas
+router.get("/all", getAllNotes);
 
-// // Obtiene una nota por su ID
-// router.get("/:id", getNoteById);
+// Obtener una nota por su ID
+router.get("/one/:nid", getNoteById);
 
-// // Agrega una nueva nota
-// router.post("/create", addNote);
+// Obtener el user de una nota
+router.get("/user/:nid", getOwnerNote);
 
-// // Actualiza una nota por su ID
-// router.put("/update/:id", updateNote);
+// Crear una nueva nota
+router.post("/create", createNote);
 
-// // Elimina una nota por su ID
-// router.delete("/delete/:id", deleteNote);
+// Actualizar una nota por su ID
+router.put("/update/:nid", updateNoteById);
 
-// // Asigna un comentario a una nota
-// router.post("/assign-comment", assignCommentToNote);
+// Eliminar una nota por su ID
+router.delete("/delete/:nid", deleteNoteById);
 
-// // Obtiene todos los comentarios asociados a una nota por su ID
-// router.get("/:id/comments", getCommentsForNote);
-
-// // Asigna un usuario como propietario de una nota
-// router.post("/assign-owner", assignOwnerToNote);
-
-// export default router;
+export default router;

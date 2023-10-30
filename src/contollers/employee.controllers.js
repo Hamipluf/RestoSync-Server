@@ -1,31 +1,43 @@
 import customResponses from "../utils/customResponses.js";
-import EmployeesDAO from "../persistencia/DAOs/employee.postgresql.js";
+import EmployeesManager from "../persistencia/DAOs/employee.postgresql.js";
 
-const employeesDAO = new EmployeesDAO();
+const employeesManager = new EmployeesManager();
 
-// Obtiene todos los empleados de una tienda
-export const getEmployeesByStoreId = async (req, res) => {
+// Obtener todos los empleados de una tienda
+export const getAllEmployeesByStore = async (req, res) => {
+  const { sid } = req.params;
   if (req.method !== "GET") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  const { storeId } = req.params;
-
-  if (!storeId) {
+  if (!sid) {
     res
-      .status(400)
-      .json(customResponses.badResponse(400, "Falta el ID de la tienda."));
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID de la tienda."));
   }
-
   try {
-    const employees = await employeesDAO.getEmployeesByStoreId(storeId);
+    const employees = await employeesManager.getAllEmployeesByStoreId(
+      parseInt(sid)
+    );
+    if (employees.length === 0) {
+      return res
+        .status(404)
+        .json(
+          customResponses.badResponse(404, "No hay empleados para devolver")
+        );
+    }
 
     if ("error" in employees) {
       return res
         .status(400)
-        .json(customResponses.badResponse(400, employees.message));
+        .json(
+          customResponses.badResponse(
+            400,
+            "Error en obtener datos",
+            employees.message
+          )
+        );
     }
 
     // Eliminar espacios en blanco sobrantes de las propiedades de cada empleado
@@ -48,72 +60,102 @@ export const getEmployeesByStoreId = async (req, res) => {
         )
       );
   } catch (error) {
-    console.error("Error al obtener empleados:", error);
+    console.error("Error al obtener los registros:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Obtiene todas las tiendas en las que un usuario es empleado
-export const getStoresByUserId = async (req, res) => {
+// Obtener un empleado por su ID
+export const getEmployeeById = async (req, res) => {
+  const { uid } = req.params;
   if (req.method !== "GET") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  const { userId } = req.params;
-
-  if (!userId) {
+  if (!uid) {
     res
-      .status(400)
-      .json(customResponses.badResponse(400, "Falta el ID del usuario."));
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID del empleado."));
   }
-
   try {
-    const stores = await employeesDAO.getStoresByUserId(userId);
-
-    if ("error" in stores) {
+    const employee = await employeesManager.getEmployeeById(parseInt(uid));
+    if ("error" in employee) {
       return res
         .status(400)
-        .json(customResponses.badResponse(400, stores.message));
+        .json(customResponses.badResponse(400, employee.message));
+    }
+
+    for (const key in employee) {
+      if (typeof employee[key] === "string") {
+        employee[key] = employee[key].trim();
+      }
     }
 
     res
       .status(200)
-      .json(customResponses.responseOk(200, "Tiendas encontradas", stores));
+      .json(customResponses.responseOk(200, "Empleado encontrado", employee));
   } catch (error) {
-    console.error("Error al obtener tiendas:", error);
+    console.error("Error al obtener los registros:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Obtiene la tienda a la que pertenece un empleado
+export const getEmployeeStore = async (req, res) => {
+  const { eid } = req.params;
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!eid) {
+    res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID del empleado."));
+  }
+  try {
+    const employee = await employeesManager.getEmployeeStore(parseInt(eid));
+    if ("error" in employee) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, employee.message));
+    }
 
-// Crea un nuevo empleado y lo asigna a una tienda
-export const createEmployee = async (req, res) => {
+    for (const key in employee) {
+      if (typeof employee[key] === "string") {
+        employee[key] = employee[key].trim();
+      }
+    }
+
+    res
+      .status(200)
+      .json(customResponses.responseOk(200, "Empleado encontrado", employee));
+  } catch (error) {
+    console.error("Error al obtener los registros:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Asigna un empleado a una tienda
+export const assignEmployee = async (req, res) => {
   if (req.method !== "POST") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { store_id, user_id } = req.body;
-
-  if (!store_id || !user_id) {
+  const { user_id, store_id } = req.body;
+  if (!user_id || !store_id) {
     return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar."));
+      .status(404)
+      .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
-
-  const employeeData = {
-    store_id,
-    user_id,
-  };
-
   try {
-    const newEmployee = await employeesDAO.createEmployee(employeeData);
+    const newEmployee = await employeesManager.assignEmployeeToStore(req.body);
 
     if ("error" in newEmployee) {
       return res
@@ -137,33 +179,29 @@ export const createEmployee = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Elimina la asignación de un empleado a una tienda
-export const removeEmployeeFromStore = async (req, res) => {
+// Eliminar un empleado por su ID
+export const removeEmployee = async (req, res) => {
+  const { eid } = req.params;
   if (req.method !== "DELETE") {
-    return res
+    res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  const { storeId, userId } = req.params;
-
-  if (!storeId || !userId) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar."));
+  if (!eid) {
+    res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID del empleado."));
   }
 
   try {
-    const removedEmployee = await employeesDAO.removeEmployeeFromStore(
-      storeId,
-      userId
+    const deletedEmployee = await employeesManager.deleteEmployeeById(
+      parseInt(eid)
     );
 
-    if ("error" in removedEmployee) {
+    if ("error" in deletedEmployee) {
       return res
         .status(400)
-        .json(customResponses.badResponse(400, removedEmployee.message));
+        .json(customResponses.badResponse(400, deletedEmployee.message));
     }
 
     res
@@ -172,7 +210,7 @@ export const removeEmployeeFromStore = async (req, res) => {
         customResponses.responseOk(
           200,
           "Empleado eliminado con éxito",
-          removedEmployee
+          deletedEmployee
         )
       );
   } catch (error) {

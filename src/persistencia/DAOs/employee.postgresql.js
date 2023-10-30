@@ -16,9 +16,6 @@ export default class EmployeeManager {
   }
   // Obtiene un empleado por su ID
   async getEmployeeById(employeeId) {
-    if (!employeeId) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
     try {
       const employee = await employeesService.getEmployeeById(employeeId);
       return employee
@@ -34,10 +31,7 @@ export default class EmployeeManager {
   }
   // Asigna un empleado a una tienda
   async assignEmployeeToStore(storeId, userId) {
-    if (!storeId || !userId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
-    try {
+      try {
       const assignment = await employeesService.addEmployeeToStore(
         storeId,
         userId
@@ -54,9 +48,7 @@ export default class EmployeeManager {
   }
   // Elimina un empleado por su ID
   async removeEmployee(employeeId) {
-    if (!employeeId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
+  
     try {
       const removed = await employeesService.removeEmployeeFromStore(
         employeeId
@@ -73,10 +65,7 @@ export default class EmployeeManager {
   }
   // Obtiene la tienda a la que pertenece un empleado
   async getEmployeeStore(employeeId) {
-    if (!employeeId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
-    try {
+       try {
       const store = await employeesService.getEmployeeStore(employeeId);
       return store
         ? store

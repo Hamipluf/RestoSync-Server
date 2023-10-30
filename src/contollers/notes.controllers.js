@@ -54,20 +54,20 @@ export const getAllNotes = async (req, res) => {
 };
 // Obtener una nota por su ID
 export const getNoteById = async (req, res) => {
-  const { id } = req.params;
+  const { nid } = req.params;
   if (req.method !== "GET") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-  if (!id) {
+  if (!nid) {
     res
       .status(400)
       .json(customResponses.badResponse(405, "Falta el ID de la nota"));
   }
 
   try {
-    const note = await notesManager.getNoteById(parseInt(id));
+    const note = await notesManager.getNoteById(parseInt(nid));
     if ("error" in note) {
       return res
         .status(400)
@@ -125,13 +125,13 @@ export const createNote = async (req, res) => {
 };
 // Actualizar una nota por su ID
 export const updateNoteById = async (req, res) => {
-  const { id } = req.params;
+  const { nid } = req.params;
   if (req.method !== "PUT") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-  if (!id) {
+  if (!nid) {
     res
       .status(400)
       .json(customResponses.badResponse(405, "Falta el ID de la nota"));
@@ -145,7 +145,7 @@ export const updateNoteById = async (req, res) => {
 
   try {
     const updatedNote = await notesManager.updateNoteById(
-      parseInt(id),
+      parseInt(nid),
       req.body
     );
 
@@ -173,19 +173,19 @@ export const updateNoteById = async (req, res) => {
 };
 // Eliminar una nota por su ID
 export const deleteNoteById = async (req, res) => {
-  const { id } = req.params;
+  const { nid } = req.params;
   if (req.method !== "DELETE") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-  if (!id) {
+  if (!nid) {
     res
       .status(400)
       .json(customResponses.badResponse(405, "Falta el ID de la nota"));
   }
   try {
-    const deletedNote = await notesManager.deleteNoteById(parseInt(id));
+    const deletedNote = await notesManager.deleteNoteById(parseInt(nid));
 
     if ("error" in deletedNote) {
       return res
@@ -205,21 +205,21 @@ export const deleteNoteById = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-// Obtener los productos de una tienda por su ID
+// Obtener el user de una nota 
 export const getOwnerNote = async (req, res) => {
-  const { id } = req.params;
+  const { nid } = req.params;
   if (req.method !== "GET") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-  if (!id) {
+  if (!nid) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "Falta el ID de la nota"));
   }
   try {
-    const owner = await notesManager.getNoteOwner(parseInt(id));
+    const owner = await notesManager.getNoteOwner(parseInt(nid));
     if ("error" in owner) {
       return res
         .status(400)

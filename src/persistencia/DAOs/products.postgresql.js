@@ -16,9 +16,6 @@ export default class ProductManager {
   }
   // Obtiene un producto por su ID
   async getProductById(productId) {
-    if (!productId) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
     try {
       const product = await productsService.getProductById(productId);
       return product
@@ -32,9 +29,6 @@ export default class ProductManager {
   // Registra un nuevo producto para una tienda
   async registerProduct(storeId, product) {
     const { title, description, price, stock_quantity, category } = product;
-    if (!title || !description || !price || !stock_quantity || !category) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
       const productData = {
         title,
@@ -59,14 +53,10 @@ export default class ProductManager {
   }
   // Actualiza un producto existente
   async updateProduct(productId, updatedProduct) {
-    if (!productId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
-      const productData = updatedProduct;
       const updated = await productsService.updateProduct(
         productId,
-        productData
+        updatedProduct
       );
       let response;
       updated.error
@@ -97,9 +87,7 @@ export default class ProductManager {
   }
   // Obtiene la tienda a la que pertenece un producto
   async getProductStore(productId) {
-    if (!productId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
+  
     try {
       const store = await productsService.getProductStore(productId);
       return store

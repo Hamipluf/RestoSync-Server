@@ -45,15 +45,12 @@ passport.use(
     },
     async (req, email, password, done) => {
       try {
-        const userData = {
-          email,
-          password,
-        };
-        const userDB = await userManager.loginUser(userData);
-        if (userDB.error) {
+     
+        const userDB = await userManager.getUserByEmail(email);
+        if (userDB) {
           const response = {
             error: true,
-            message: userDB.message,
+            message: "Ya existe un user con ese email.",
           };
           return done(false, response);
         }

@@ -3,16 +3,22 @@ import customResponses from "../utils/customResponses.js";
 
 const productManager = new ProductManager();
 
-// Obtener todos los productos
+// Obtener todos los productos de una tienda
 export const getAllProducts = async (req, res) => {
+  const { sid } = req.params;
   if (req.method !== "GET") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
+  if (!sid) {
+    return res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID de la store."));
+  }
 
   try {
-    const products = await productManager.getAllProducts();
+    const products = await productManager.getAllProductsByStoreId(parseInt(sid));
     if (Array.isArray(products) && products.length === 0) {
       return res
         .status(404)
@@ -76,12 +82,63 @@ export const getProductById = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Obtiene la tienda a la que pertenece un producto
+export const getStoreProduct = async (req, res) => {
+  const { pid } = req.params;
+  if (req.method !== "GET") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+
+  if (!pid) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Falta el ID del producto"));
+  }
+
+  try {
+    const product = await productManager.getAllProductsByStoreId(parseInt(pid));
+
+    if ("error" in product) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, product.message));
+    }
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(
+          200,
+          "Store del producto encontrada",
+          product
+        )
+      );
+  } catch (error) {
+    console.error("Error al obtener el store del producto:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
 // Crear un producto
 export const createProduct = async (req, res) => {
+  const { sid } = req.params;
   if (req.method !== "POST") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!sid) {
+    return res
+      .status(404)
+      .json(
+        customResponses.badResponse(
+          404,
+          "Falta el ID de la store para agregar el producto."
+        )
+      );
   }
 
   const { title, description, stock_quantity, category, price } = req.body;
@@ -90,13 +147,10 @@ export const createProduct = async (req, res) => {
   }
 
   try {
-    const createdProduct = await productManager.createProduct({
-      title,
-      description,
-      stock_quantity,
-      category,
-      price,
-    });
+    const createdProduct = await productManager.registerProduct(
+      parseInt(pid),
+      req.body
+    );
 
     if ("error" in createdProduct) {
       return res
@@ -121,7 +175,7 @@ export const createProduct = async (req, res) => {
   }
 };
 // Actualizar un campo del producto por ID
-export const updateProductField = async (req, res) => {
+export const updateProduct = async (req, res) => {
   if (req.method !== "PUT") {
     return res
       .status(405)
@@ -138,7 +192,7 @@ export const updateProductField = async (req, res) => {
   }
 
   try {
-    const updatedProduct = await productManager.updateProductField(
+    const updatedProduct = await productManager.updateProduct(
       parseInt(pid),
       newInfo
     );
@@ -179,7 +233,7 @@ export const deleteProduct = async (req, res) => {
     return res
       .status(400)
       .json(
-        customResponses.badResponse(400, "Falta el ID del producto a eliminar")
+        customResponses.badResponse(400, "Falta el ID del producto a eliminar.")
       );
   }
 

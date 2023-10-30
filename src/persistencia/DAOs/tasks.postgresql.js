@@ -16,9 +16,6 @@ export default class TaskManager {
   }
   // Obtiene una tarea por su ID
   async getTaskById(taskId) {
-    if (!taskId) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
     try {
       const task = await tasksService.getTaskById(taskId);
       return task
@@ -32,9 +29,7 @@ export default class TaskManager {
   // Crea una nueva tarea para un usuario
   async createTask(userId, task) {
     const { name, is_completed } = task;
-    if (!name || !is_completed) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
+
     try {
       const taskData = { name, is_completed };
       const newTask = await tasksService.createTask(userId, taskData);
@@ -50,9 +45,6 @@ export default class TaskManager {
   }
   // Actualiza una tarea existente
   async updateTask(taskId, updatedTask) {
-    if (!taskId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
       const taskData = updatedTask;
       const updated = await tasksService.updateTask(taskId, taskData);
@@ -68,9 +60,6 @@ export default class TaskManager {
   }
   // Elimina una tarea por su ID
   async deleteTask(taskId) {
-    if (!taskId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
       const deleted = await tasksService.deleteTask(taskId);
       let response;
@@ -85,9 +74,6 @@ export default class TaskManager {
   }
   // Obtiene el usuario al que pertenece una tarea
   async getTaskUser(taskId) {
-    if (!taskId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
       const user = await tasksService.getTaskUser(taskId);
       return user

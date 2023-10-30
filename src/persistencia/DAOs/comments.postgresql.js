@@ -16,9 +16,6 @@ export default class CommentManager {
   }
   // Obtiene un comentario por su ID
   async getCommentById(commentId) {
-    if (!commentId) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
     try {
       const comment = await commentsService.getCommentById(commentId);
       return comment
@@ -34,16 +31,8 @@ export default class CommentManager {
   }
   // Crea un nuevo comentario para un usuario
   async createComment(userId, comment) {
-    const { body } = comment;
-    if (!body) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
-      const commentData = { body };
-      const newComment = await commentsService.createComment(
-        userId,
-        commentData
-      );
+      const newComment = await commentsService.createComment(userId, comment);
       let response;
       newComment.error
         ? (response = { error: true, message: newComment.data })
@@ -56,14 +45,10 @@ export default class CommentManager {
   }
   // Actualiza un comentario existente
   async updateComment(commentId, updatedComment) {
-    if (!commentId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
-      const commentData = updatedComment;
       const updated = await commentsService.updateComment(
         commentId,
-        commentData
+        updatedComment
       );
       let response;
       updated.error
@@ -77,9 +62,6 @@ export default class CommentManager {
   }
   // Elimina un comentario por su ID
   async deleteComment(commentId) {
-    if (!commentId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
     try {
       const deleted = await commentsService.deleteComment(commentId);
       let response;
@@ -94,9 +76,7 @@ export default class CommentManager {
   }
   // Obtiene el usuario que realizó un comentario
   async getCommentUser(commentId) {
-    if (!commentId) {
-      return { error: true, message: "Faltan campos a completar." };
-    }
+
     try {
       const user = await commentsService.getCommentUser(commentId);
       return user

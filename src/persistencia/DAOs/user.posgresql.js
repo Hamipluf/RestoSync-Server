@@ -59,7 +59,7 @@ export default class UserManager {
     }
     try {
       const user = await usersServices.getUserByEmail(email);
-      return user ? user : { error: true, message: `Email incorrecto` };
+      return user ? user : null;
     } catch (err) {
       console.log("ERROR getUserByEmail users.posgres", err);
       return { error: true, data: err };

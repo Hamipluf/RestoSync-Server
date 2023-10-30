@@ -2,16 +2,24 @@ import customResponses from "../utils/customResponses.js";
 import CommentsManager from "../persistencia/DAOs/comments.postgresql.js";
 
 const commentsManager = new CommentsManager();
-// Obtiene todos los comentarios
-export const getAllComments = async (req, res) => {
+
+// Obtiene todos los comentarios de un usuario
+export const getAllCommentsByUser = async (req, res) => {
+  const { uid } = req.params;
   if (req.method !== "GET") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
+  if (!uid) {
+    res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el id del user."));
+  }
   try {
-    const comments = await commentsManager.getAllComments();
+    const comments = await commentsManager.getAllCommentsByUserId(
+      parseInt(uid)
+    );
     if (comments.length === 0) {
       return res
         .status(404)
@@ -26,7 +34,7 @@ export const getAllComments = async (req, res) => {
         .json(
           customResponses.badResponse(
             400,
-            "Error al obtener comentarios",
+            "Error en obtener datos",
             comments.message
           )
         );
@@ -52,31 +60,27 @@ export const getAllComments = async (req, res) => {
         )
       );
   } catch (error) {
-    console.error("Error al obtener los comentarios:", error);
+    console.error("Error al obtener los registros:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Obtiene un comentario por su ID
+// Obtener un comentario por su ID
 export const getCommentById = async (req, res) => {
-  const { id } = req.params;
-
+  const { cid } = req.params;
   if (req.method !== "GET") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-  if (!id) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Falta el ID del comentario."));
+  if (!cid) {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Falta el ID del comentario."));
   }
-
   try {
-    const comment = await commentsManager.getCommentById(parseInt(id));
-
+    const comment = await commentsManager.getCommentById(parseInt(cid));
     if ("error" in comment) {
       return res
         .status(400)
@@ -93,15 +97,51 @@ export const getCommentById = async (req, res) => {
       .status(200)
       .json(customResponses.responseOk(200, "Comentario encontrado", comment));
   } catch (error) {
-    console.error("Error al obtener el comentario:", error);
+    console.error("Error al obtener los registros:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Obtiene el usuario que realizó un comentario
+export const getCommentUser = async (req, res) => {
+  const { cid } = req.params;
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!cid) {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Falta el ID del comentario."));
+  }
+  try {
+    const comment = await commentsManager.getCommentUser(parseInt(cid));
+    if ("error" in comment) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, comment.message));
+    }
 
-// Agrega un nuevo comentario
-export const addComment = async (req, res) => {
+    for (const key in comment) {
+      if (typeof comment[key] === "string") {
+        comment[key] = comment[key].trim();
+      }
+    }
+
+    res
+      .status(200)
+      .json(customResponses.responseOk(200, "Comentario encontrado", comment));
+  } catch (error) {
+    console.error("Error al obtener los registros:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Crear un nuevo comentario
+export const createComment = async (req, res) => {
   if (req.method !== "POST") {
     return res
       .status(405)
@@ -109,21 +149,13 @@ export const addComment = async (req, res) => {
   }
 
   const { body, user_id } = req.body;
-
   if (!body || !user_id) {
     return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar."));
+      .status(404)
+      .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
-
-  const commentData = {
-    body,
-    user_id,
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
   try {
-    const newComment = await commentsManager.addComment(commentData);
+    const newComment = await commentsManager.createComment(req.body);
 
     if ("error" in newComment) {
       return res
@@ -147,38 +179,30 @@ export const addComment = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Actualiza un comentario por su ID
-export const updateComment = async (req, res) => {
-  const { id } = req.params;
-  const { body, user_id, updated_at } = req.body;
-
+// Actualizar un comentario por su ID
+export const updateCommentById = async (req, res) => {
+  const { cid } = req.params;
   if (req.method !== "PUT") {
-    return res
+    res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  if (!body || !user_id) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar."));
-  }
-  if (!id) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Falta el ID del comentario."));
+  if (!cid) {
+    res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID del comentario."));
   }
 
-  const updateCommentData = {
-    ...req.body,
-    updated_at: new Date(),
-  };
-
+  const { newData } = req.body;
+  if (!newData) {
+    res
+      .status(404)
+      .json(customResponses.badResponse(404, "Faltan campos a completar."));
+  }
   try {
-    const updatedComment = await commentsManager.updateComment(
-      parseInt(id),
-      updateCommentData
+    const updatedComment = await commentsManager.updateCommentById(
+      parseInt(cid),
+      newData
     );
 
     if ("error" in updatedComment) {
@@ -203,23 +227,24 @@ export const updateComment = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-// Elimina un comentario por su ID
-export const deleteComment = async (req, res) => {
-  const { id } = req.params;
-
+// Eliminar un comentario por su ID
+export const deleteCommentById = async (req, res) => {
+  const { cid } = req.params;
   if (req.method !== "DELETE") {
-    return res
+    res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-  if (!id) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Falta el ID del comentario."));
+  if (!cid) {
+    res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID del comentario."));
   }
+
   try {
-    const deletedComment = await commentsManager.deleteComment(parseInt(id));
+    const deletedComment = await commentsManager.deleteCommentById(
+      parseInt(cid)
+    );
 
     if ("error" in deletedComment) {
       return res
