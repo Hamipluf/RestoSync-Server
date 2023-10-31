@@ -1,93 +1,87 @@
 import { query } from "../persistencia/PostgreSQL/config.js";
 
-class NoteServices {
-  // Crear una nueva nota
-  async createNote(note) {
-    const { title, description, contacts, comments } = note;
-    try {
-      const result = await query(
-        `
-      INSERT INTO notes (title, description, contacts, comments)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *;
-    `,
-        [title, description, contacts, comments]
-      );
-
-      return result.rows[0];
-    } catch (error) {
-      return { error: true, data: error };
-    }
+class NotesService {
+  constructor(model) {
+    this.model = model;
   }
-  // Obtener todas las notas
-  async getAllNotes() {
+  // Obtiene todas las notas
+  getAllNotes = async () => {
     try {
-      const result = await query(`
-      SELECT * FROM notes;
-    `);
-
-      return result.rows;
-    } catch (error) {
-      return { error: true, data: error };
-    }
-  }
-  // Obtener una nota por su ID
-  async getNoteById(nid) {
-    try {
-      const result = await query(
-        `
-          SELECT * FROM notes
-          WHERE id = $1;
-        `,
-        [nid]
-      );
-
-      return result.rows[0] || null;
-    } catch (error) {
-      return { error: true, data: error };
-    }
-  }
-
-  // Actualizar una nota por su ID
-  async updateNoteById(noteId, fieldToUpdate, newValue) {
-    try {
-      const result = await query(
-        `UPDATE notes SET ${fieldToUpdate} = $1 WHERE id = $2 RETURNING *`,
-        [newValue, nid]
-      );
-
-      if (result.rows.length === 0) {
-        return {
-          error: true,
-          message: `Nota con ID ${nid} no encontrada`,
-        };
-      }
-
-      return result.rows[0];
+      const notes = await query("SELECT * FROM notes");
+      return notes.rows;
     } catch (err) {
       return { error: true, data: err };
     }
-  }
+  };
 
-  // Eliminar una nota por su ID
-  async deleteNoteById(nid) {
+  // Obtiene una nota por su ID
+  getNoteById = async (noteId) => {
     try {
-      const result = await query(
-        `
-      DELETE FROM notes
-      WHERE id = $1
-      RETURNING *;
-    `,
-        [nid]
-      );
-
-      return result.rows[0] || null;
-    } catch (error) {
-      return { error: true, data: error };
+      const data = await query("SELECT * FROM notes WHERE id = $1", [noteId]);
+      const note = data.rows[0];
+      return note;
+    } catch (err) {
+      return { error: true, data: err };
     }
-  }
+  };
+
+  // Crea una nueva nota
+  createNote = async (note, owner_id) => {
+    const { title, description, is_completed } = note;
+    console.log("note", note);
+    try {
+      const noteCreated = await query(
+        "INSERT INTO notes (title, description, owner_id, is_completed) VALUES ($1, $2, $3, $4) RETURNING *",
+        [title, description, owner_id, is_completed]
+      );
+      return noteCreated.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Actualiza una nota existente
+  updateNote = async (noteId, updatedNote) => {
+    const { title, description, is_completed } = updatedNote;
+    try {
+      const noteUpdated = await query(
+        "UPDATE notes SET title = $1, description = $2, is_completed = $3 WHERE id = $4 RETURNING *",
+        [title, description, is_completed, noteId]
+      );
+      return noteUpdated.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Elimina una nota por su ID
+  deleteNote = async (noteId) => {
+    try {
+      const noteDeleted = await query(
+        "DELETE FROM notes WHERE id = $1 RETURNING *",
+        [noteId]
+      );
+      return noteDeleted.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Obtiene el propietario de una nota
+  getNoteOwner = async (noteId) => {
+    try {
+      const data = await query(
+        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM notes n JOIN users u ON n.owner_id = u.id WHERE n.id = $1",
+        [noteId]
+      );
+      const owner = data.rows[0];
+      return owner;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
 }
 
-const noteServices = new NoteServices();
+const notesService = new NotesService();
 
-export default noteServices;
+export default notesService;

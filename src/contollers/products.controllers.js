@@ -3,16 +3,24 @@ import customResponses from "../utils/customResponses.js";
 
 const productManager = new ProductManager();
 
-// Obtener todos los productos
+// Obtener todos los productos de una tienda
 export const getAllProducts = async (req, res) => {
+  const { sid } = req.params;
   if (req.method !== "GET") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
+  if (!sid) {
+    return res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID de la store."));
+  }
 
   try {
-    const products = await productManager.getAllProducts();
+    const products = await productManager.getAllProductsByStoreId(
+      parseInt(sid)
+    );
     if (Array.isArray(products) && products.length === 0) {
       return res
         .status(404)
@@ -44,21 +52,21 @@ export const getAllProducts = async (req, res) => {
 };
 // Obtener un producto por ID
 export const getProductById = async (req, res) => {
-  const { id } = req.params;
+  const { pid } = req.params;
   if (req.method !== "GET") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  if (!id) {
+  if (!pid) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "Falta el ID del producto"));
   }
 
   try {
-    const product = await productManager.getProductById(id);
+    const product = await productManager.getProductById(parseInt(pid));
 
     if ("error" in product) {
       return res
@@ -76,18 +84,75 @@ export const getProductById = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-// Crear un producto
-export const createProduct = async (req, res) => {
-  if (req.method !== "POST") {
+// Obtiene la tienda a la que pertenece un producto
+export const getStoreProduct = async (req, res) => {
+  const { pid } = req.params;
+  if (req.method !== "GET") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const productData = req.body;
+  if (!pid) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Falta el ID del producto"));
+  }
 
   try {
-    const createdProduct = await productManager.createProduct(productData);
+    const product = await productManager.getAllProductsByStoreId(parseInt(pid));
+
+    if ("error" in product) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, product.message));
+    }
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(
+          200,
+          "Store del producto encontrada",
+          product
+        )
+      );
+  } catch (error) {
+    console.error("Error al obtener el store del producto:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Crear un producto
+export const createProduct = async (req, res) => {
+  const { sid } = req.params;
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!sid) {
+    return res
+      .status(404)
+      .json(
+        customResponses.badResponse(
+          404,
+          "Falta el ID de la store para agregar el producto."
+        )
+      );
+  }
+
+  const { title, description, stock_quantity, category, price } = req.body;
+  if (!title || !stock_quantity || !price) {
+    return { error: true, message: "Faltan campos a completar." };
+  }
+
+  try {
+    const createdProduct = await productManager.registerProduct(
+      parseInt(sid),
+      req.body
+    );
 
     if ("error" in createdProduct) {
       return res
@@ -112,27 +177,39 @@ export const createProduct = async (req, res) => {
   }
 };
 // Actualizar un campo del producto por ID
-export const updateProductField = async (req, res) => {
+export const updateProduct = async (req, res) => {
   if (req.method !== "PUT") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { id } = req.params;
-  const { fieldToUpdate, newValue } = req.body;
+  const { title, description, stock_quantity, category, price, product_id } =
+    req.body;
 
-  if (!id || !fieldToUpdate || newValue === undefined) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+  if (
+    !title ||
+    !stock_quantity ||
+    !price ||
+    !description ||
+    !category ||
+    !product_id
+  ) {
+    return { error: true, message: "Faltan campos a completar." };
   }
 
+  const productData = {
+    title,
+    description,
+    stock_quantity,
+    category,
+    price,
+  };
+
   try {
-    const updatedProduct = await productManager.updateProductField(
-      id,
-      fieldToUpdate,
-      newValue
+    const updatedProduct = await productManager.updateProduct(
+      parseInt(product_id),
+      productData
     );
 
     if ("error" in updatedProduct) {
@@ -165,18 +242,18 @@ export const deleteProduct = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { id } = req.params;
+  const { pid } = req.params;
 
-  if (!id) {
+  if (!pid) {
     return res
       .status(400)
       .json(
-        customResponses.badResponse(400, "Falta el ID del producto a eliminar")
+        customResponses.badResponse(400, "Falta el ID del producto a eliminar.")
       );
   }
 
   try {
-    const deletedProduct = await productManager.deleteProduct(id);
+    const deletedProduct = await productManager.deleteProduct(parseInt(pid));
 
     if ("error" in deletedProduct) {
       return res

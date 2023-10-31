@@ -6,7 +6,7 @@ const { Pool } = pkg;
 const pool = new Pool({
   connectionString: process.env.URL_POSTGRESQL_PRODUC,
   ssl: {
-    rejectUnauthorized: true, // Activa la verificación de certificados
+    rejectUnauthorized: false, 
   },
 });
 pool

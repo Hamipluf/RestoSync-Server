@@ -10,6 +10,10 @@ const secret_cookie = process.env.SECRET_COOKIE;
 import users from "./routes/users.route.js";
 import products from "./routes/products.route.js";
 import notes from "./routes/note.route.js";
+import stores from "./routes/stores.route.js";
+import comments from "./routes/comments.router.js";
+import employee from "./routes/employee.route.js";
+import tasks from "./routes/tasks.router.js";
 // Passport
 import passport from "passport";
 import "./passport/passportStrategies.js";
@@ -40,6 +44,10 @@ app.use(passport.initialize());
 app.use("/api/users", users);
 app.use("/api/products", products);
 app.use("/api/notes", notes);
+app.use("/api/stores", stores);
+app.use("/api/comments", comments);
+app.use("/api/employees", employee);
+app.use("/api/tasks", tasks);
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);

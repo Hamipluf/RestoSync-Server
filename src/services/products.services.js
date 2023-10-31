@@ -1,85 +1,90 @@
 import { query } from "../persistencia/PostgreSQL/config.js";
-class ProductService {
+
+class ProductsService {
   constructor(model) {
     this.model = model;
   }
-  // Obtiene todos los productos
-  getAllProducts = async () => {
+
+  // Obtiene todos los productos de una tienda
+  getAllProductsOfStore = async (storeId) => {
     try {
-      const products = await query("SELECT * FROM products");
-      return products;
+      const products = await query(
+        "SELECT * FROM products WHERE store_id = $1",
+        [storeId]
+      );
+      return products.rows;
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Obtiene un prducto dependiendo del user ID
-  getProductById = async (pid) => {
+  // Obtiene un producto por su ID
+  getProductById = async (productId) => {
     try {
-      const data = await query("SELECT * FROM products WHERE id = $1", [pid]);
+      const data = await query("SELECT * FROM products WHERE id = $1", [
+        productId,
+      ]);
       const product = data.rows[0];
       return product;
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Crea un usuario
-  createProduct = async (product) => {
-    const { title, description, stock, categories, price } = product;
+  // Crea un nuevo producto en una tienda
+  createProduct = async (storeId, product) => {
+    const { title, description, price, stock_quantity, category } = product;
     try {
       const productCreated = await query(
-        "INSERT INTO products (title, description, stock, categories, price) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [title, description, stock, categories, price]
+        "INSERT INTO products (title, description, price, stock_quantity, category, store_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [title, description, price, stock_quantity, category, storeId]
       );
       return productCreated.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Elimina un producto por ID
-  deleteProduct = async (pid) => {
+  // Actualiza un producto existente
+  updateProduct = async (productId, updatedProduct) => {
+    const { title, description, price, stock_quantity, category } =
+      updatedProduct;
     try {
-      const data = await query("DELETE * FROM products WHERE id = $1", [pid]);
-      const product = data.rows[0];
-      return product;
-    } catch (err) {
-      return { error: true, data: err };
-    }
-  };
-  // Actualiza un campo del producto por ID
-  updateProductField = async (pid, fieldToUpdate, newValue) => {
-    try {
-      const result = await query(
-        `UPDATE products SET ${fieldToUpdate} = $1 WHERE id = $2 RETURNING *`,
-        [newValue, pid]
+      const productUpdated = await query(
+        "UPDATE products SET title = $1, description = $2, price = $3, stock_quantity = $4, category = $5 WHERE id = $6 RETURNING *",
+        [title, description, price, stock_quantity, category, productId]
       );
-
-      if (result.rows.length === 0) {
-        return {
-          error: true,
-          message: `Producto con ID ${productId} no encontrado`,
-        };
-      }
-
-      return result.rows[0];
+      return productUpdated.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Eliminar un producto por ID
-  async deleteProduct(pid) {
-    if (!pid) {
-      return { error: true, message: "Falta el ID del producto a eliminar." };
-    }
+
+  // Elimina un producto por su ID
+  deleteProduct = async (productId) => {
     try {
-      const deletedProduct = await productService.deleteProduct(pid);
-      return deletedProduct;
+      const productDeleted = await query(
+        "DELETE FROM products WHERE id = $1 RETURNING *",
+        [productId]
+      );
+      return productDeleted.rows[0];
     } catch (err) {
-      console.log("ERROR deleteProduct product.postgres", err);
       return { error: true, data: err };
     }
-  }
+  };
+
+  // Obtiene la tienda a la que pertenece un producto
+  getProductStore = async (productId) => {
+    try {
+      const data = await query(
+        "SELECT s.* FROM products p JOIN stores s ON p.store_id = s.id WHERE p.id = $1",
+        [productId]
+      );
+      const store = data.rows[0];
+      return store;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
 }
 
-const productService = new ProductService();
+const productsService = new ProductsService();
 
-export default productService;
+export default productsService;

@@ -36,12 +36,11 @@ class UsersService {
   };
   // Crea un usuario
   createAnUser = async (user) => {
-    const { name, last_name, email, password, username, role, photos, tasks } =
-      user;
+    const { name, last_name, email, password, username, role, photos } = user;
     try {
       const userCreated = await query(
-        "INSERT INTO users (name, last_name, email, password, role, username, photos, tasks) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-        [name, last_name, email, password, role, username, photos, tasks]
+        "INSERT INTO users (name, last_name, email, password, role, username, photos) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+        [name, last_name, email, password, role, username, photos]
       );
       return userCreated;
     } catch (err) {
