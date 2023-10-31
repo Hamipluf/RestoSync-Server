@@ -34,7 +34,6 @@ class StoresService {
         `INSERT INTO stores (name, company_name, address, cuit, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
         [name, company_name, address, cuit, owner_id]
       );
-      console.log("Stored", storeCreated)
       return storeCreated.rows[0];
     } catch (err) {
       return { error: true, data: err };
