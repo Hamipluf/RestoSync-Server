@@ -18,7 +18,7 @@ router.get("/", getAllStores);
 router.get("/one/:sid", getStoreById);
 
 // Obtener los productos de una tienda por su ID
-router.get("/products/:pid", getProductsByStore);
+router.get("/products/:sid", getProductsByStore);
 
 // Obtener los empleados de una tienda por su ID
 router.get("/employees/:sid", getEmployeesByStoreId);
@@ -27,7 +27,7 @@ router.get("/employees/:sid", getEmployeesByStoreId);
 router.post("/create", createStore);
 
 // Actualizar una tienda por su ID
-router.put("/udapte/:sid", updateStoreById);
+router.put("/update/:sid", updateStoreById);
 
 // Eliminar una tienda por su ID
 router.delete("/delete/:sid", deleteStoreById);

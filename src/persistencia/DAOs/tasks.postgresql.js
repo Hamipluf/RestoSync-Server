@@ -27,12 +27,10 @@ export default class TaskManager {
     }
   }
   // Crea una nueva tarea para un usuario
-  async createTask(userId, task) {
-    const { name, is_completed } = task;
-
+  async createTask(uid, name) {
     try {
-      const taskData = { name, is_completed };
-      const newTask = await tasksService.createTask(userId, taskData);
+      const taskData = { name, is_completed: false };
+      const newTask = await tasksService.createTask(uid, taskData);
       let response;
       newTask.error
         ? (response = { error: true, message: newTask.data })
@@ -46,8 +44,7 @@ export default class TaskManager {
   // Actualiza una tarea existente
   async updateTask(taskId, updatedTask) {
     try {
-      const taskData = updatedTask;
-      const updated = await tasksService.updateTask(taskId, taskData);
+      const updated = await tasksService.updateTask(taskId, updatedTask);
       let response;
       updated.error
         ? (response = { error: true, message: updated.data })

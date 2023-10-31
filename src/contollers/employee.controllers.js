@@ -155,7 +155,7 @@ export const assignEmployee = async (req, res) => {
       .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
   try {
-    const newEmployee = await employeesManager.assignEmployeeToStore(req.body);
+    const newEmployee = await employeesManager.assignEmployeeToStore(user_id, store_id);
 
     if ("error" in newEmployee) {
       return res
@@ -194,7 +194,7 @@ export const removeEmployee = async (req, res) => {
   }
 
   try {
-    const deletedEmployee = await employeesManager.deleteEmployeeById(
+    const deletedEmployee = await employeesManager.removeEmployee(
       parseInt(eid)
     );
 

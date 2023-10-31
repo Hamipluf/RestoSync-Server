@@ -17,12 +17,10 @@ export default class NoteManager {
     }
   }
   // Crea una nueva nota para un usuario
-  async createNote(userId, note) {
-    const { title, description, is_completed } = note;
+  async createNote(owner_id, note) {
 
     try {
-      const noteData = { title, description, is_completed };
-      const newNote = await notesService.createNote(userId, noteData);
+      const newNote = await notesService.createNote(owner_id, note);
       let response;
       newNote.error
         ? (response = { error: true, message: newNote.data })

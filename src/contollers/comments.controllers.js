@@ -149,13 +149,19 @@ export const createComment = async (req, res) => {
   }
 
   const { body, user_id } = req.body;
-  if (!body || !user_id) {
+
+  if (!user_id) {
+    return res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID del usuario."));
+  }
+  if (!body) {
     return res
       .status(404)
       .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
   try {
-    const newComment = await commentsManager.createComment(req.body);
+    const newComment = await commentsManager.createComment(user_id, body);
 
     if ("error" in newComment) {
       return res
@@ -193,16 +199,16 @@ export const updateCommentById = async (req, res) => {
       .json(customResponses.badResponse(404, "Falta el ID del comentario."));
   }
 
-  const { newData } = req.body;
-  if (!newData) {
+  const { body } = req.body;
+  if (!body) {
     res
       .status(404)
       .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
   try {
-    const updatedComment = await commentsManager.updateCommentById(
+    const updatedComment = await commentsManager.updateComment(
       parseInt(cid),
-      newData
+      body
     );
 
     if ("error" in updatedComment) {
@@ -242,7 +248,7 @@ export const deleteCommentById = async (req, res) => {
   }
 
   try {
-    const deletedComment = await commentsManager.deleteCommentById(
+    const deletedComment = await commentsManager.deleteComment(
       parseInt(cid)
     );
 

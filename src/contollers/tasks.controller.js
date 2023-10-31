@@ -140,15 +140,24 @@ export const createTask = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  // Recibir y validar los datos de la nueva tarea desde req.body
-  const { name, is_completed } = req.body;
-  if (!name || !is_completed) {
+  const { name, user_id } = req.body;
+  if (!name) {
     return res
       .status(404)
       .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
+  if (!user_id) {
+    return res
+      .status(404)
+      .json(
+        customResponses.badResponse(
+          404,
+          "Falta el ID del user para crear la tarea."
+        )
+      );
+  }
   try {
-    const newTask = await tasksManager.createTask(req.body);
+    const newTask = await tasksManager.createTask(parseInt(user_id), name);
 
     if ("error" in newTask) {
       return res
@@ -180,17 +189,14 @@ export const updateTaskById = async (req, res) => {
       .json(customResponses.badResponse(404, "Falta el ID de la tarea."));
   }
 
-  const { newData } = req.body;
-  if (!newData) {
+  const { name, is_completed } = req.body;
+  if (!name || !is_completed) {
     res
       .status(404)
       .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
   try {
-    const updatedTask = await tasksManager.updateTaskById(
-      parseInt(tid),
-      req.body
-    );
+    const updatedTask = await tasksManager.updateTask(parseInt(tid), req.body);
 
     if ("error" in updatedTask) {
       return res
@@ -229,7 +235,7 @@ export const deleteTaskById = async (req, res) => {
   }
 
   try {
-    const deletedTask = await tasksManager.deleteTaskById(parseInt(tid));
+    const deletedTask = await tasksManager.deleteTask(parseInt(tid));
 
     if ("error" in deletedTask) {
       return res

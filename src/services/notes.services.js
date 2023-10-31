@@ -26,8 +26,9 @@ class NotesService {
   };
 
   // Crea una nueva nota
-  createNote = async (note) => {
-    const { title, description, owner_id, is_completed } = note;
+  createNote = async (note, owner_id) => {
+    const { title, description, is_completed } = note;
+    console.log("note", note);
     try {
       const noteCreated = await query(
         "INSERT INTO notes (title, description, owner_id, is_completed) VALUES ($1, $2, $3, $4) RETURNING *",
@@ -70,7 +71,7 @@ class NotesService {
   getNoteOwner = async (noteId) => {
     try {
       const data = await query(
-        "SELECT u.* FROM notes n JOIN users u ON n.owner_id = u.id WHERE n.id = $1",
+        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM notes n JOIN users u ON n.owner_id = u.id WHERE n.id = $1",
         [noteId]
       );
       const owner = data.rows[0];

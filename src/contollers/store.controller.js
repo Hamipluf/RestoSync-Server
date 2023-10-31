@@ -147,7 +147,7 @@ export const updateStoreById = async (req, res) => {
   }
 
   try {
-    const updatedStore = await storeManager.updateStoreById(
+    const updatedStore = await storeManager.updateStore(
       parseInt(sid),
       req.body
     );
@@ -188,7 +188,7 @@ export const deleteStoreById = async (req, res) => {
       .json(customResponses.badResponse(400, "Falta el ID de la tienda"));
   }
   try {
-    const deletedStore = await storeManager.deleteStoreById(parseInt(sid));
+    const deletedStore = await storeManager.deleteStore(parseInt(sid));
 
     if ("error" in deletedStore) {
       return res
@@ -214,19 +214,19 @@ export const deleteStoreById = async (req, res) => {
 };
 // Obtener los productos de una tienda por su ID
 export const getProductsByStore = async (req, res) => {
-  const { pid } = req.params;
+  const { sid } = req.params;
   if (req.method !== "GET") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-  if (!pid) {
+  if (!sid) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "Falta el ID de la tienda"));
   }
   try {
-    const products = await storeManager.getProducts(parseInt(pid));
+    const products = await storeManager.getProducts(parseInt(sid));
     if (products.length === 0) {
       return res
         .status(404)

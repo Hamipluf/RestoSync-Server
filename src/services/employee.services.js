@@ -8,7 +8,7 @@ class EmployeesService {
   getEmployeesByStoreId = async (storeId) => {
     try {
       const employees = await query(
-        "SELECT u.* FROM employees e JOIN users u ON e.user_id = u.id WHERE e.store_id = $1",
+        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM employees e JOIN users u ON e.user_id = u.id WHERE e.store_id = $1",
         [storeId]
       );
       return employees.rows;
@@ -21,7 +21,7 @@ class EmployeesService {
   getEmployeeById = async (employeeId) => {
     try {
       const data = await query(
-        "SELECT u.* FROM employees e JOIN users u ON e.user_id = u.id WHERE e.id = $1",
+        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM employees e JOIN users u ON e.user_id = u.id WHERE e.id = $1",
         [employeeId]
       );
       const employee = data.rows[0];
@@ -32,11 +32,11 @@ class EmployeesService {
   };
 
   // Agrega un empleado a un store
-  addEmployeeToStore = async (storeId, userId) => {
+  addEmployeeToStore = async (user_id, store_id) => {
     try {
       const employeeAdded = await query(
         "INSERT INTO employees (store_id, user_id) VALUES ($1, $2) RETURNING *",
-        [storeId, userId]
+        [store_id, user_id]
       );
       return employeeAdded.rows[0];
     } catch (err) {
@@ -61,7 +61,7 @@ class EmployeesService {
   getEmployeeStore = async (employeeId) => {
     try {
       const data = await query(
-        "SELECT s.* FROM employees e JOIN stores s ON e.store_id = s.id WHERE e.id = $1",
+        "SELECT s.* FROM employees e JOIN stores s ON e.store_id = s.id WHERE e.user_id = $1",
         [employeeId]
       );
       const store = data.rows[0];

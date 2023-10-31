@@ -46,11 +46,11 @@ class CommentsService {
 
   // Actualiza un comentario existente
   updateComment = async (commentId, updatedComment) => {
-    const { body } = updatedComment;
+    const { body, updated_at } = updatedComment;
     try {
       const commentUpdated = await query(
-        "UPDATE comments SET body = $1 WHERE id = $2 RETURNING *",
-        [body, commentId]
+        "UPDATE comments SET body = $1 , updated_at = $2 WHERE id = $3 RETURNING *",
+        [body, updated_at, commentId]
       );
       return commentUpdated.rows[0];
     } catch (err) {
@@ -75,7 +75,7 @@ class CommentsService {
   getCommentUser = async (commentId) => {
     try {
       const data = await query(
-        "SELECT u.* FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = $1",
+        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = $1",
         [commentId]
       );
       const user = data.rows[0];

@@ -14,16 +14,16 @@ const router = express.Router();
 router.get("/all/store/:sid", getAllProducts);
 
 // Obtener un producto por ID
-router.get("/one/:id", getProductById);
+router.get("/one/:pid", getProductById);
 
 // Obtiene la tienda a la que pertenece un producto
 router.get("/store/:sid", getStoreProduct);
 
-// Crear un nuevo producto
+// Crear un nuevo producto en una tienda
 router.post("/create", createProduct);
 
 // Actualizar un campo del producto por ID
-router.put("/udapte/:id", updateProduct);
+router.put("/udapte/:pid", updateProduct);
 
 // Eliminar un producto por ID
 router.delete("/delete/:id", deleteProduct);

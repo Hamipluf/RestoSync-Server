@@ -30,11 +30,11 @@ export default class EmployeeManager {
     }
   }
   // Asigna un empleado a una tienda
-  async assignEmployeeToStore(storeId, userId) {
+  async assignEmployeeToStore(store_id, user_id) {
       try {
       const assignment = await employeesService.addEmployeeToStore(
-        storeId,
-        userId
+        store_id,
+        user_id
       );
       let response;
       assignment.error

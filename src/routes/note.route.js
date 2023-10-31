@@ -2,16 +2,12 @@ import express from "express";
 import {
   createNote,
   deleteNoteById,
-  getAllNotes,
   getNoteById,
   getOwnerNote,
   updateNoteById,
 } from "../contollers/notes.controllers.js";
 
 const router = express.Router();
-// Obtener todas las notas
-router.get("/all", getAllNotes);
-
 // Obtener una nota por su ID
 router.get("/one/:nid", getNoteById);
 

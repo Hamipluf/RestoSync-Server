@@ -28,25 +28,33 @@ export default class UserManager {
     }
   }
   async registerUser(user) {
-    const { name, last_name, email, password, role, username } = user;
-    if (!email || !password || !last_name || !name || !role || !username) {
+    const { name, last_name, email, password, username } = user;
+    if (!email || !password || !last_name || !name || !username) {
       return { error: true, message: "Faltan campos a completar." };
     }
     try {
       const passwordHashed = await hashData(password);
+      let roleUser = 1;
+      const admin = ["ramirogumma@hotmail.com"];
+      if (admin.includes(email)) {
+        roleUser = 3;
+      }
       const userData = {
         name,
         last_name,
         email,
         password: passwordHashed,
-        role,
+        // 1 user, 2 user premium, 3 odmin
+        role: roleUser,
         username,
+        photos: null,        
       };
       const newUser = await usersServices.createAnUser(userData);
       let response;
       newUser.error
         ? (response = { error: true, message: newUser.data })
         : (response = newUser.rows[0]);
+
       return response;
     } catch (err) {
       console.log("ERROR registerUser users.posgres", err);

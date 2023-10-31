@@ -67,7 +67,7 @@ class TasksService {
   // Obtiene el usuario al que pertenece una tarea
   getTaskUser = async (taskId) => {
     try {
-      const data = await query("SELECT u.* FROM tasks t JOIN users u ON t.user_id = u.id WHERE t.id = $1", [taskId]);
+      const data = await query("SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM tasks t JOIN users u ON t.user_id = u.id WHERE t.id = $1", [taskId]);
       const user = data.rows[0];
       return user;
     } catch (err) {

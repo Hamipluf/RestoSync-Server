@@ -30,9 +30,9 @@ export default class CommentManager {
     }
   }
   // Crea un nuevo comentario para un usuario
-  async createComment(userId, comment) {
-    try {
-      const newComment = await commentsService.createComment(userId, comment);
+  async createComment(userId, body) {
+        try {
+      const newComment = await commentsService.createComment(userId, dataComment);
       let response;
       newComment.error
         ? (response = { error: true, message: newComment.data })
@@ -44,11 +44,15 @@ export default class CommentManager {
     }
   }
   // Actualiza un comentario existente
-  async updateComment(commentId, updatedComment) {
+  async updateComment(commentId, body) {
+    const dataComment = {
+      body,
+      updated_at: new Date()
+    }
     try {
       const updated = await commentsService.updateComment(
         commentId,
-        updatedComment
+        dataComment
       );
       let response;
       updated.error
@@ -76,7 +80,6 @@ export default class CommentManager {
   }
   // Obtiene el usuario que realizó un comentario
   async getCommentUser(commentId) {
-
     try {
       const user = await commentsService.getCommentUser(commentId);
       return user

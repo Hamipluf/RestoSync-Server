@@ -101,6 +101,7 @@ export const register = (req, res) => {
   }
   const token = authManager.generateToken(user);
   const userResponse = {
+    id: user.id,
     name: user.name,
     last_name: user.last_name,
     email: user.email,

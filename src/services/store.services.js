@@ -28,12 +28,13 @@ class StoresService {
 
   // Crea un nuevo store
   createStore = async (store) => {
-    const { name, company_name, address, cuit, owner_id } = store;
+    const { name, company_name, address, cuit, owner_id} = store;
     try {
       const storeCreated = await query(
-        "INSERT INTO stores (name, company_name, address, cuit, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+        `INSERT INTO stores (name, company_name, address, cuit, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
         [name, company_name, address, cuit, owner_id]
       );
+      console.log("Stored", storeCreated)
       return storeCreated.rows[0];
     } catch (err) {
       return { error: true, data: err };
@@ -67,7 +68,7 @@ class StoresService {
   // Obtiene todos los empleados de un store
   getStoreEmployees = async (storeId) => {
     try {
-      const employees = await query("SELECT u.* FROM employees e JOIN users u ON e.user_id = u.id WHERE e.store_id = $1", [storeId]);
+      const employees = await query("SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM employees e JOIN users u ON e.user_id = u.id WHERE e.store_id = $1", [storeId]);
       return employees.rows;
     } catch (err) {
       return { error: true, data: err };

@@ -18,7 +18,9 @@ export const getAllProducts = async (req, res) => {
   }
 
   try {
-    const products = await productManager.getAllProductsByStoreId(parseInt(sid));
+    const products = await productManager.getAllProductsByStoreId(
+      parseInt(sid)
+    );
     if (Array.isArray(products) && products.length === 0) {
       return res
         .status(404)
@@ -148,7 +150,7 @@ export const createProduct = async (req, res) => {
 
   try {
     const createdProduct = await productManager.registerProduct(
-      parseInt(pid),
+      parseInt(sid),
       req.body
     );
 
@@ -182,19 +184,32 @@ export const updateProduct = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { pid } = req.params;
-  const { newInfo } = req.body;
+  const { title, description, stock_quantity, category, price, product_id } =
+    req.body;
 
-  if (!pid || !newInfo) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+  if (
+    !title ||
+    !stock_quantity ||
+    !price ||
+    !description ||
+    !category ||
+    !product_id
+  ) {
+    return { error: true, message: "Faltan campos a completar." };
   }
+
+  const productData = {
+    title,
+    description,
+    stock_quantity,
+    category,
+    price,
+  };
 
   try {
     const updatedProduct = await productManager.updateProduct(
-      parseInt(pid),
-      newInfo
+      parseInt(product_id),
+      productData
     );
 
     if ("error" in updatedProduct) {
