@@ -7,7 +7,7 @@ class UsersService {
   getAllUsers = async () => {
     try {
       const newUser = await query(
-        "SELECT name, lastname, email, role FROM users"
+        "SELECT id, name, last_name, email, role, username, photos FROM users"
       );
       return newUser;
     } catch (err) {
@@ -43,6 +43,15 @@ class UsersService {
         [name, last_name, email, password, role, username, photos]
       );
       return userCreated;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+  // Crea un usuario
+  deleteUser = async (uid) => {
+    try {
+      const taskDeleted = await query("DELETE FROM users WHERE id = $1 RETURNING *", [uid]);
+      return taskDeleted.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }

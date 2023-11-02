@@ -28,7 +28,6 @@ class NotesService {
   // Crea una nueva nota
   createNote = async (note, owner_id) => {
     const { title, description, is_completed } = note;
-    console.log("note", note);
     try {
       const noteCreated = await query(
         "INSERT INTO notes (title, description, owner_id, is_completed) VALUES ($1, $2, $3, $4) RETURNING *",
