@@ -1,15 +1,14 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 import { describe, it } from "mocha";
-
-// Importa el servicio de usuarios que deseas probar
+// Service
 import productService from "../../src/services/products.services.js";
 
 chai.use(chaiHttp);
 
 const expect = chai.expect;
 
-describe("Tasks services", () => {
+describe("Products services", () => {
   const newProductData = {
     title: "Nuevo Producto",
     description: "Descripcion Nuevo Producto",

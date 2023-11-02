@@ -3,12 +3,13 @@ dotenv.config();
 import pkg from "pg";
 const { Pool } = pkg;
 
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: process.env.URL_POSTGRESQL_PRODUC,
   ssl: {
     rejectUnauthorized: false, 
   },
 });
+// Conexion a la DB
 pool
   .connect()
   .then(() => {
