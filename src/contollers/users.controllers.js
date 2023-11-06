@@ -69,6 +69,7 @@ export const getOneById = async (req, res) => {
       }
     }
     const userResponse = {
+      id: userDB.id,
       name: userDB.name,
       lastname: userDB.lastname,
       email: userDB.email,
@@ -135,6 +136,7 @@ export const login = (req, res) => {
   }
   const token = authManager.generateToken(user);
   const userResponse = {
+    id: user.id,
     name: user.name,
     last_name: user.last_name,
     email: user.email,
