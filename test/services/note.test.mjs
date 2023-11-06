@@ -30,6 +30,20 @@ describe("Notes services", () => {
       .that.is.equal(newNoteData.is_completed);
     expect(result).to.have.property("owner_id").that.is.equal(2);
   });
+  it("Get notes of user", async () => {
+    const user_id = 2 // Ramiro
+    const result = await noteService.getAllNotesByUserId(user_id);
+    expect(result).to.be.an("array");
+    result.forEach((note) => {
+      expect(note).to.be.an("object");
+      expect(note).to.have.property("id").that.is.a("number");
+      expect(note).to.have.property("title").that.is.a("string");
+      expect(note).to.have.property("description").that.is.a("string");
+      expect(note).to.have.property("created_at").that.is.a("date");
+      expect(note).to.have.property("is_completed").that.is.a("boolean");
+      expect(note).to.have.property("owner_id").that.is.equal(user_id);
+    });
+  });
   it("Get all notes", async () => {
     const result = await noteService.getAllNotes();
     expect(result).to.be.an("array");

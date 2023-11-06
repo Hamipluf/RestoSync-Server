@@ -16,6 +16,21 @@ export default class NoteManager {
       return { error: true, data: err };
     }
   }
+  // OObtiene todas las notas de un user
+  async getNoteByUser(owner_id) {
+    if (!owner_id) {
+      return { error: true, message: "Faltan campos a completar" };
+    }
+    try {
+      const notes = await notesService.getAllNotesByUserId(owner_id);
+      return notes
+        ? notes
+        : { error: true, message: `No hay una notas para el user ${owner_id}` };
+    } catch (err) {
+      console.log("ERROR getNoteByUser notes.postgres", err);
+      return { error: true, data: err };
+    }
+  }
   // Crea una nueva nota para un usuario
   async createNote(owner_id, note) {
 

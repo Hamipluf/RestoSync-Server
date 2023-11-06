@@ -13,7 +13,19 @@ class NotesService {
       return { error: true, data: err };
     }
   };
+  // Obtiene todas las notas de un user
+  getAllNotesByUserId = async (userId) => {
+    try {
+      const notes = await query(
+        "SELECT notes.*, owner_id AS owner_id, users.name, users.email, users.username, users.photos, users.last_name, users.role FROM notes INNER JOIN users ON notes.owner_id = owner_id WHERE users.id = $1",
+        [userId]
+      );
 
+      return notes.rows;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
   // Obtiene una nota por su ID
   getNoteById = async (noteId) => {
     try {

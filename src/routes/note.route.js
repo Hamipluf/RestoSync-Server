@@ -5,6 +5,7 @@ import {
   getNoteById,
   getOwnerNote,
   updateNoteById,
+  getNoteByUser,
 } from "../contollers/notes.controllers.js";
 
 const router = express.Router();
@@ -13,6 +14,9 @@ router.get("/one/:nid", getNoteById);
 
 // Obtener el user de una nota
 router.get("/user/:nid", getOwnerNote);
+
+// Obtener las notas de un user
+router.get("/all/user/:oid", getNoteByUser);
 
 // Crear una nueva nota
 router.post("/create", createNote);

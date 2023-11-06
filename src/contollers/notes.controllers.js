@@ -41,6 +41,44 @@ export const getNoteById = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Obtener una nota por su ID
+export const getNoteByUser = async (req, res) => {
+  const { oid } = req.params;
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido."));
+  }
+  if (!oid) {
+    res
+      .status(400)
+      .json(customResponses.badResponse(405, "Falta el ID del usuario."));
+  }
+
+  try {
+    const notes = await notesManager.getNoteByUser(parseInt(oid));
+    if ("error" in notes) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, notes.message));
+    }
+
+    for (const key in notes) {
+      if (typeof notes[key] === "string") {
+        notes[key] = notes[key].trim();
+      }
+    }
+
+    res
+      .status(200)
+      .json(customResponses.responseOk(200, "Notas encontradas", notes));
+  } catch (error) {
+    console.error("Error al obtener los registros:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
 // Crear una nueva nota
 export const createNote = async (req, res) => {
   if (req.method !== "POST") {
