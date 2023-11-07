@@ -15,6 +15,15 @@ class StoresService {
     }
   };
 
+  getStoreOfUser = async (owner_id) => {
+    try {
+      const stores = await query("SELECT * FROM stores WHERE owner_id = $1", [owner_id]);
+      return stores.rows;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  }
+
   // Obtiene un store por su ID
   getStoreById = async (storeId) => {
     try {
@@ -83,6 +92,8 @@ class StoresService {
       return { error: true, data: err };
     }
   }
+
+
 }
 
 const storesService = new StoresService();

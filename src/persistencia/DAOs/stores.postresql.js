@@ -24,6 +24,18 @@ export default class StoreManager {
       return { error: true, data: err };
     }
   }
+  // Obtiene las tiendas de un user
+  async getStoreOfUser(ownerId) {
+    try {
+      const store = await storesService.getStoreOfUser(ownerId);
+      return store
+        ? store
+        : { error: true, message: `El user ${ownerId} no posee tiendas.` };
+    } catch (err) {
+      console.log("ERROR getStoreOfUser stores.postgres", err);
+      return { error: true, data: err };
+    }
+  }
   // Registra una nueva tienda
   async registerStore(store) {
     const { name, company_name, address, cuit, owner_id } = store;

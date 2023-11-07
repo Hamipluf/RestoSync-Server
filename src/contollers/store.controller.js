@@ -52,6 +52,58 @@ export const getAllStores = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Obtener las tiendas de un user
+export const getStoreOfUser = async (req, res) => { 
+  const { oid } = req.params;
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  try {
+    const stores = await storeManager.getStoreOfUser(parseInt(oid));
+    if (stores.length === 0) {
+      return res
+        .status(404)
+        .json(
+          customResponses.badResponse(404, "No hay tiendas para este usuario")
+        );
+    }
+
+    if ("error" in stores) {
+      return res
+        .status(400)
+        .json(
+          customResponses.badResponse(
+            400,
+            "Error en obtener datos",
+            stores.message
+          )
+        );
+    }
+
+    // Eliminar espacios en blanco sobrantes de las propiedades de cada tienda
+    const formattedStores = stores.map((store) => {
+      for (const key in store) {
+        if (typeof store[key] === "string") {
+          store[key] = store[key].trim();
+        }
+      }
+      return store;
+    });
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(200, "Tiendas encontradas", formattedStores)
+      );
+  } catch (error) {
+    console.error("Error al obtener los registros:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
 // Obtener una tienda por su ID
 export const getStoreById = async (req, res) => {
   const { sid } = req.params;

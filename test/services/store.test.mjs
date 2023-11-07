@@ -45,6 +45,23 @@ describe("Store services", () => {
       expect(store).to.have.property("cuit").that.is.a("string");
     });
   });
+  it("Get stores of an user", async () => {
+    const owner_id = 2; // Ramiro
+    // Obtener todas las tiendas
+    const result = await storeServices.getStoreOfUser(owner_id);
+    expect(result).to.be.an("array");
+
+    // Verifica el formato de los objetos en el array
+    result.forEach((store) => {
+      expect(store).to.be.an("object");
+      expect(store).to.have.property("id").that.is.a("number");
+      expect(store).to.have.property("name").that.is.a("string");
+      expect(store).to.have.property("company_name").that.is.a("string");
+      expect(store).to.have.property("address").that.is.a("string");
+      expect(store).to.have.property("owner_id").that.is.a("number");
+      expect(store).to.have.property("cuit").that.is.a("string");
+    });
+  });
   it("Udapte store", async () => {
     const updatedData = {
       name: "Nombre Actualizado",

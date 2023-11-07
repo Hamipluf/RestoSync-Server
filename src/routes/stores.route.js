@@ -7,6 +7,7 @@ import {
   getProductsByStore,
   getStoreById,
   updateStoreById,
+  getStoreOfUser,
 } from "../contollers/store.controller.js";
 
 const router = express.Router();
@@ -15,7 +16,10 @@ const router = express.Router();
 router.get("/", getAllStores);
 
 // Obtener una tienda por su ID
-router.get("/one/:sid", getStoreById);
+router.get("/one/:oid", getStoreById);
+
+// Obtener el owner de una tienda
+router.get("/one/:sid", getStoreOfUser);
 
 // Obtener los productos de una tienda por su ID
 router.get("/products/:sid", getProductsByStore);
