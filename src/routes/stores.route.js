@@ -16,7 +16,7 @@ const router = express.Router();
 router.get("/", getAllStores);
 
 // Obtener una tienda por su ID
-router.get("/one/:oid", getStoreById);
+router.get("/owner/:oid", getStoreById);
 
 // Obtener el owner de una tienda
 router.get("/one/:sid", getStoreOfUser);
