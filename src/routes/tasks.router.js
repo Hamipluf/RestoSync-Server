@@ -6,6 +6,8 @@ import {
   getTaskById,
   getUserByTask,
   updateTaskById,
+  addNote,
+  getAllNotesOfTasks
 } from "../contollers/tasks.controller.js";
 
 const router = express.Router();
@@ -18,8 +20,14 @@ router.get("/user/:tid", getUserByTask);
 // Obtener una tarea por su ID
 router.get("/one/:tid", getTaskById);
 
+// Obtener todas las notas de una tarea
+router.get("/all/notes/:tid", getAllNotesOfTasks);
+
 // Crear una nueva tarea
 router.post("/create", createTask);
+
+// Agregar una nota a la tarea
+router.post("/add/note", addNote);
 
 // Actualizar una tarea por su ID
 router.put("/update/:tid", updateTaskById);

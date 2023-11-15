@@ -32,11 +32,10 @@ class CommentsService {
 
   // Crea un nuevo comentario para un usuario
   createComment = async (userId, comment) => {
-    const { body } = comment;
     try {
       const commentCreated = await query(
         "INSERT INTO comments (body, user_id) VALUES ($1, $2) RETURNING *",
-        [body, userId]
+        [comment, userId]
       );
       return commentCreated.rows[0];
     } catch (err) {

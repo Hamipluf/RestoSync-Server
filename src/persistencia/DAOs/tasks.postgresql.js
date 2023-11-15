@@ -41,6 +41,20 @@ export default class TaskManager {
       return { error: true, data: err };
     }
   }
+  // Agregar una nota a la tarea
+  async addNote(note_id, task_id) {
+    try {
+      const newNote = await tasksService.addNoteToTask(note_id, task_id);
+      let response;
+      newNote.error
+        ? (response = { error: true, message: newNote.data })
+        : (response = newNote);
+      return response;
+    } catch (err) {
+      console.log("ERROR addNote tasks.postgres", err);
+      return { error: true, data: err };
+    }
+  }
   // Actualiza una tarea existente
   async updateTask(taskId, updatedTask) {
     try {
@@ -66,6 +80,21 @@ export default class TaskManager {
       return response;
     } catch (err) {
       console.log("ERROR deleteTask tasks.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Obtiene las notas de una tarea
+  async getNotes(taskId) {
+    try {
+      const notes = await tasksService.getNotesOfTask(taskId);
+      return notes
+        ? notes
+        : {
+            error: true,
+            message: `No se encontró notas de la tarea con el ID ${taskId}`,
+          };
+    } catch (err) {
+      console.log("ERROR getTaskUser tasks.postgres", err);
       return { error: true, data: err };
     }
   }

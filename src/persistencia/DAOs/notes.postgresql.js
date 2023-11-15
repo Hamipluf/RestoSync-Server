@@ -33,7 +33,6 @@ export default class NoteManager {
   }
   // Crea una nueva nota para un usuario
   async createNote(owner_id, note) {
-
     try {
       const newNote = await notesService.createNote(owner_id, note);
       let response;
@@ -43,6 +42,22 @@ export default class NoteManager {
       return response;
     } catch (err) {
       console.log("ERROR createNote notes.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Agrega un comentario a una nota específica
+  async addCommentToNote(noteId, comment, userId) {
+    try {
+      const result = await notesService.addCommentToNote(
+        noteId,
+        comment,
+        userId
+      );
+      return result.error
+        ? { error: true, message: result.data }
+        : { success: true, commentId: result.data };
+    } catch (err) {
+      console.log("ERROR addCommentToNote notes.postgres", err);
       return { error: true, data: err };
     }
   }
@@ -87,6 +102,36 @@ export default class NoteManager {
           };
     } catch (err) {
       console.log("ERROR getNoteOwner notes.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Elimina la relacion entre un comentario y una nota
+  async deleteCommentOfNote(noteId, commentId) {
+    try {
+      const deleteComment = await notesService.deleteCommentNoteRelation(noteId, commentId)
+      return deleteComment
+        ? deleteComment
+        : {
+            error: true,
+            message: `No se pudo eliminar el comentario ${commentId} de la nota con ID ${noteId}`,
+          };
+    } catch (err) {
+      console.log("ERROR deleteCommentOfNote notes.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Obtiene todos los comentarios de una nota
+  async getAllCommentByNoteId(noteId) {
+    try {
+      const comments = await notesService.getAllCommentsByNoteId(noteId);
+      return comments
+        ? comments
+        : {
+            error: true,
+            message: `No se encontraron comentarios de la nota con el ID ${noteId}`,
+          };
+    } catch (err) {
+      console.log("ERROR getAllCommentByNoteId notes.postgres", err);
       return { error: true, data: err };
     }
   }

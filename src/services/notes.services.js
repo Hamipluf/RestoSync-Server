@@ -1,4 +1,5 @@
 import { query } from "../persistencia/PostgreSQL/config.js";
+import commentsService from "./comments.service.js";
 
 class NotesService {
   constructor(model) {
@@ -13,6 +14,7 @@ class NotesService {
       return { error: true, data: err };
     }
   };
+
   // Obtiene todas las notas de un user
   getAllNotesByUserId = async (userId) => {
     try {
@@ -26,6 +28,7 @@ class NotesService {
       return { error: true, data: err };
     }
   };
+
   // Obtiene una nota por su ID
   getNoteById = async (noteId) => {
     try {
@@ -78,6 +81,24 @@ class NotesService {
     }
   };
 
+  // Agrega un comentario a una nota específica
+  addCommentToNote = async (note_id, comment, user_id) => {
+    try {
+      // Primero, creamos el comentario usando el servicio de comentarios (commentsService)
+      const newComment = await commentsService.createComment(user_id, comment);
+      const commentId = newComment.id;
+      // Luego, vinculamos el comentario a la nota en la tabla intermedia note_comments
+      const linkCommentToNote = await query(
+        "INSERT INTO note_comments (note_id, comment_id) VALUES ($1, $2) RETURNING *",
+        [note_id, commentId]
+      );
+
+      return linkCommentToNote.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
   // Obtiene el propietario de una nota
   getNoteOwner = async (noteId) => {
     try {
@@ -87,6 +108,35 @@ class NotesService {
       );
       const owner = data.rows[0];
       return owner;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
+  // Obtener todos los comentarios de una nota por su ID
+  getAllCommentsByNoteId = async (noteId) => {
+    try {
+      const comments = await query(
+        "SELECT c.*, u.name as user_name, u.email as user_email, u.username as user_username, u.photos as user_photos, u.last_name as user_last_name, u.role as user_role " +
+          "FROM comments c " +
+          "JOIN note_comments nc ON c.id = nc.comment_id " +
+          "JOIN users u ON c.user_id = u.id " +
+          "WHERE nc.note_id = $1",
+        [noteId]
+      );
+      return comments.rows;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+  // Eliminar la relación de un comentario a una nota
+  deleteCommentNoteRelation = async (noteId, commentId) => {
+    try {
+      const deleteRelation = await query(
+        "DELETE FROM note_comments WHERE note_id = $1 AND comment_id = $2 RETURNING *",
+        [noteId, commentId]
+      );
+      return deleteRelation.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }

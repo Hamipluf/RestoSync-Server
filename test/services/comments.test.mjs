@@ -10,7 +10,7 @@ const expect = chai.expect;
 
 describe("Comments services", () => {
   const newCommentData = {
-    body: "Contenido del Comentario",
+    comment: "Contenido del Comentario",
   };
   let commentIdcreated;
 

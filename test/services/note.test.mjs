@@ -15,6 +15,7 @@ describe("Notes services", () => {
     is_completed: false,
   };
   let noteIdCreated;
+  let commentIdCreated;
 
   it("Create a note", async () => {
     const result = await noteService.createNote(newNoteData, 2); // 2 es id de Ramiro
@@ -30,8 +31,22 @@ describe("Notes services", () => {
       .that.is.equal(newNoteData.is_completed);
     expect(result).to.have.property("owner_id").that.is.equal(2);
   });
+  it("Create comment of a note", async () => {
+    const comment = "Comentario de Testeo";
+    const user_id = 2; // Ramiro
+    const result = await noteService.addCommentToNote(
+      noteIdCreated,
+      comment,
+      user_id
+    );
+    commentIdCreated = result.comment_id;
+    expect(result).to.be.an("object");
+    expect(result).to.have.property("id").that.is.a("number");
+    expect(result).to.have.property("note_id").that.is.a("number");
+    expect(result).to.have.property("comment_id").that.is.a("number");
+  });
   it("Get notes of user", async () => {
-    const user_id = 2 // Ramiro
+    const user_id = 2; // Ramiro
     const result = await noteService.getAllNotesByUserId(user_id);
     expect(result).to.be.an("array");
     result.forEach((note) => {
@@ -79,6 +94,21 @@ describe("Notes services", () => {
       .to.have.property("is_completed")
       .that.is.equal(updatedData.is_completed);
   });
+  it("Get all comments of note", async () => {
+    const result = await noteService.getAllCommentsByNoteId(noteIdCreated);
+    expect(result).to.be.an("array");
+    result.forEach((note) => {
+      expect(note).to.be.an("object");
+      expect(note).to.have.property("id").that.is.a("number");
+      expect(note).to.have.property("body").that.is.a("string");
+      expect(note).to.have.property("created_at").that.is.a("date");
+      expect(note).to.have.property("user_name").that.is.a("string");
+      expect(note).to.have.property("user_email").that.is.a("string");
+      expect(note).to.have.property("user_username").that.is.a("string");
+      expect(note).to.have.property("user_last_name").that.is.a("string");
+      expect(note).to.have.property("user_role").that.is.a("number");
+    });
+  });
   it("Get owner of a note", async () => {
     const result = await noteService.getNoteOwner(noteIdCreated);
     expect(result).to.be.an("object");
@@ -88,6 +118,19 @@ describe("Notes services", () => {
     expect(result).to.have.property("email").that.is.a("string");
     expect(result).to.have.property("role").that.is.a("number");
     expect(result).to.have.property("username").that.is.a("string");
+  });
+  it("Delete comment of note", async () => {
+    const result = await noteService.deleteCommentNoteRelation(
+      noteIdCreated,
+      commentIdCreated
+    );
+    // console.log("Delete comment", result)
+    expect(result).to.be.an("object");
+    expect(result).to.have.property("id").that.is.a("number");
+    expect(result).to.have.property("note_id").that.is.equal(noteIdCreated);
+    expect(result)
+      .to.have.property("comment_id")
+      .that.is.equal(commentIdCreated);
   });
   it("Delete a note", async () => {
     const result = await noteService.deleteNote(noteIdCreated);

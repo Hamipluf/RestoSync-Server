@@ -88,7 +88,7 @@ export const createNote = async (req, res) => {
   }
 
   const { title, description, owner_id } = req.body;
-  console.log(req.body)
+  console.log(req.body);
   if (!title || !description) {
     return res
       .status(404)
@@ -149,10 +149,7 @@ export const updateNoteById = async (req, res) => {
   }
 
   try {
-    const updatedNote = await notesManager.updateNote(
-      parseInt(nid),
-      req.body
-    );
+    const updatedNote = await notesManager.updateNote(parseInt(nid), req.body);
 
     if ("error" in updatedNote) {
       return res
@@ -241,6 +238,128 @@ export const getOwnerNote = async (req, res) => {
       .json(customResponses.responseOk(200, "Dueño encontrado", owner));
   } catch (error) {
     console.error("Error al obtener el dueño de la nota:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Agregar un comentario a una nota específica
+export const addCommentToNote = async (req, res) => {
+  const { comment, user_id, note_id } = req.body;
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+
+  if (!note_id || !comment || !user_id) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+  }
+
+  try {
+    const result = await notesManager.addCommentToNote(
+      parseInt(note_id),
+      comment,
+      user_id
+    );
+
+    if ("error" in result) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, result.message));
+    }
+
+    res
+      .status(201)
+      .json(
+        customResponses.responseOk(201, "Comentario agregado con éxito", result)
+      );
+  } catch (error) {
+    console.error("Error al agregar comentario a la nota:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+
+// Obtiene todos los comentarios de una nota
+export const getAllCommentsByNoteId = async (req, res) => {
+  const { nid } = req.params;
+
+  if (req.method !== "GET") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+
+  if (!nid) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Falta el ID de la nota"));
+  }
+
+  try {
+    const comments = await notesManager.getAllCommentByNoteId(parseInt(nid));
+    if ("error" in comments) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, comments.message));
+    }
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(200, "Comentarios encontrados", comments)
+      );
+  } catch (error) {
+    console.error("Error al obtener comentarios de la nota:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Eliminar commentario de una nota
+export const deleteCommentOfnote = async (req, res) => {
+  const { nid, cid } = req.params;
+  if (req.method !== "DELETE") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!nid || !cid) {
+    res
+      .status(400)
+      .json(
+        customResponses.badResponse(
+          405,
+          "Falta el ID de la nota o del comentrario."
+        )
+      );
+  }
+  try {
+    const deletedNote = await notesManager.deleteCommentOfNote(
+      parseInt(nid),
+      parseInt(cid)
+    );
+    if (deletedNote.error) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, deletedNote.message));
+    }
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(
+          200,
+          "Comentario de nota eliminada con éxito",
+          deletedNote
+        )
+      );
+  } catch (error) {
+    console.error("Error al eliminar la nota:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));

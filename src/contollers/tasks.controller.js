@@ -58,6 +58,60 @@ export const getAllTasksByUser = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Obtener todas las notas de una tarea
+export const getAllNotesOfTasks = async (req, res) => {
+  const { tid } = req.params;
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  if (!tid) {
+    res
+      .status(404)
+      .json(customResponses.badResponse(404, "Falta el ID de la tarea."));
+  }
+  try {
+    const notes = await tasksManager.getNotes(parseInt(tid));
+    if (notes.length === 0) {
+      return res
+        .status(404)
+        .json(customResponses.badResponse(404, "No hay notas para devolver."));
+    }
+    if ("error" in notes) {
+      return res
+        .status(400)
+        .json(
+          customResponses.badResponse(
+            400,
+            "Error en obtener datos.",
+            notes.message
+          )
+        );
+    }
+
+    // Eliminar espacios en blanco sobrantes de las propiedades de cada nota
+    const formattedNote = notes.map((note) => {
+      for (const key in note) {
+        if (typeof note[key] === "string") {
+          note[key] = note[key].trim();
+        }
+      }
+      return note;
+    });
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(200, "Notas encontradas", formattedNote)
+      );
+  } catch (error) {
+    console.error("Error al obtener los registros:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
 // Obtiene el usuario al que pertenece una tarea
 export const getUserByTask = async (req, res) => {
   const { tid } = req.params;
@@ -170,6 +224,49 @@ export const createTask = async (req, res) => {
       .json(customResponses.responseOk(201, "Tarea creada con éxito", newTask));
   } catch (error) {
     console.error("Error al crear la tarea:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// CAgregar una nota a la tarea
+export const addNote = async (req, res) => {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+
+  const { note_id, task_id } = req.body;
+  if (!note_id || !task_id) {
+    return res
+      .status(404)
+      .json(
+        customResponses.badResponse(
+          404,
+          "Falta el ID de la tarea o de la nota."
+        )
+      );
+  }
+  try {
+    const newNote = await tasksManager.addNote(
+      parseInt(note_id),
+      parseInt(task_id)
+    );
+
+    if ("error" in newNote) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, newNote.message));
+    }
+
+    res
+      .status(201)
+      .json(
+        customResponses.responseOk(201, "Nota agregada con éxito", newNote)
+      );
+  } catch (error) {
+    console.error("Error al crear la nota:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
