@@ -1,3 +1,4 @@
+import { response } from "express";
 import notesService from "../../services/notes.services.js";
 
 export default class NoteManager {
@@ -32,9 +33,13 @@ export default class NoteManager {
     }
   }
   // Crea una nueva nota para un usuario
-  async createNote(owner_id, note) {
+  async createNote(owner_id, title, description) {
     try {
-      const newNote = await notesService.createNote(owner_id, note);
+      const newNote = await notesService.createNote(
+        owner_id,
+        title,
+        description
+      );
       let response;
       newNote.error
         ? (response = { error: true, message: newNote.data })
@@ -42,6 +47,25 @@ export default class NoteManager {
       return response;
     } catch (err) {
       console.log("ERROR createNote notes.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Crea y agreca una nota a una tarea
+  async addTaskToNote(owner_id, task_id, description, title) {
+    let response;
+    try {
+      // Crear nota
+      const newNote = await this.createNote(owner_id, title, description);
+      newNote.error
+        ? (response = { error: true, message: newNote.data })
+        : (response = { success: true, data: newNote.data });
+      const noteAdded = await notesService.addTaskToNote(newNote?.id, task_id);
+      noteAdded.error
+        ? (response = { error: true, message: noteAdded.data })
+        : (response = { success: true, data: noteAdded.data });
+      return response;
+    } catch (err) {
+      console.log("ERROR addTaskToNote notes.postgres", err);
       return { error: true, data: err };
     }
   }
@@ -108,7 +132,10 @@ export default class NoteManager {
   // Elimina la relacion entre un comentario y una nota
   async deleteCommentOfNote(noteId, commentId) {
     try {
-      const deleteComment = await notesService.deleteCommentNoteRelation(noteId, commentId)
+      const deleteComment = await notesService.deleteCommentNoteRelation(
+        noteId,
+        commentId
+      );
       return deleteComment
         ? deleteComment
         : {

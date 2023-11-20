@@ -41,12 +41,11 @@ class NotesService {
   };
 
   // Crea una nueva nota
-  createNote = async (note, owner_id) => {
-    const { title, description, is_completed } = note;
+  createNote = async (title, description, owner_id) => {
     try {
       const noteCreated = await query(
-        "INSERT INTO notes (title, description, owner_id, is_completed) VALUES ($1, $2, $3, $4) RETURNING *",
-        [title, description, owner_id, is_completed]
+        "INSERT INTO notes (title, description, owner_id) VALUES ($1, $2, $3) RETURNING *",
+        [title, description, owner_id]
       );
       return noteCreated.rows[0];
     } catch (err) {
@@ -96,6 +95,27 @@ class NotesService {
       return linkCommentToNote.rows[0];
     } catch (err) {
       return { error: true, data: err };
+    }
+  };
+
+  // Método para el service de notes que agrega una tarea a una nota
+  addTaskToNote = async (note_id, task_id) => {
+    try {
+      const result = await query(
+        "UPDATE notes SET task_id = $1 WHERE id = $2 RETURNING *",
+        [task_id, note_id]
+      );
+      console.log(result)
+      if (result.rows.length > 0) {
+        return result.rows[0];
+      } else {
+        return {
+          error: true,
+          data: "No se pudo agregar la tarea a la nota.",
+        };
+      }
+    } catch (err) {
+      return { error: true, data: err.message };
     }
   };
 

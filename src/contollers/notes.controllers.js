@@ -88,7 +88,6 @@ export const createNote = async (req, res) => {
   }
 
   const { title, description, owner_id } = req.body;
-  console.log(req.body);
   if (!title || !description) {
     return res
       .status(404)
@@ -104,13 +103,9 @@ export const createNote = async (req, res) => {
         )
       );
   }
-  const noteData = {
-    title,
-    description,
-    is_completed: false,
-  };
+
   try {
-    const newNote = await notesManager.createNote(noteData, owner_id);
+    const newNote = await notesManager.createNote(title, description, owner_id);
 
     if ("error" in newNote) {
       return res
@@ -238,6 +233,47 @@ export const getOwnerNote = async (req, res) => {
       .json(customResponses.responseOk(200, "Dueño encontrado", owner));
   } catch (error) {
     console.error("Error al obtener el dueño de la nota:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Agregar un comentario a una nota específica
+export const addTaskToNote = async (req, res) => {
+  const { task_id, title, description, owner_id } = req.body;
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+
+  if (!task_id || !title || !description || !owner_id) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+  }
+
+  try {
+    const result = await notesManager.addTaskToNote(
+      parseInt(owner_id),
+      parseInt(task_id),
+      description,
+      title
+    );
+
+    if ("error" in result) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, result.message));
+    }
+
+    res
+      .status(201)
+      .json(
+        customResponses.responseOk(201, "Tarea agregada con éxito", result)
+      );
+  } catch (error) {
+    console.error("Error al agregar la tarea a la nota:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));

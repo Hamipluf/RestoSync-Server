@@ -1,7 +1,9 @@
 import customResponses from "../utils/customResponses.js";
 import TasksManager from "../persistencia/DAOs/tasks.postgresql.js";
+import NoteManager from "../persistencia/DAOs/notes.postgresql.js";
 
 const tasksManager = new TasksManager();
+const notesManager = new NoteManager();
 
 // Obtener todas las tareas de un usuario
 export const getAllTasksByUser = async (req, res) => {
@@ -224,49 +226,6 @@ export const createTask = async (req, res) => {
       .json(customResponses.responseOk(201, "Tarea creada con éxito", newTask));
   } catch (error) {
     console.error("Error al crear la tarea:", error);
-    return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
-  }
-};
-// CAgregar una nota a la tarea
-export const addNote = async (req, res) => {
-  if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json(customResponses.badResponse(405, "Método no permitido"));
-  }
-
-  const { note_id, task_id } = req.body;
-  if (!note_id || !task_id) {
-    return res
-      .status(404)
-      .json(
-        customResponses.badResponse(
-          404,
-          "Falta el ID de la tarea o de la nota."
-        )
-      );
-  }
-  try {
-    const newNote = await tasksManager.addNote(
-      parseInt(note_id),
-      parseInt(task_id)
-    );
-
-    if ("error" in newNote) {
-      return res
-        .status(400)
-        .json(customResponses.badResponse(400, newNote.message));
-    }
-
-    res
-      .status(201)
-      .json(
-        customResponses.responseOk(201, "Nota agregada con éxito", newNote)
-      );
-  } catch (error) {
-    console.error("Error al crear la nota:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
