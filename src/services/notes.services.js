@@ -42,6 +42,7 @@ class NotesService {
 
   // Crea una nueva nota
   createNote = async (title, description, owner_id) => {
+    console.log("title:", title, "desc:", description, "oid", owner_id);
     try {
       const noteCreated = await query(
         "INSERT INTO notes (title, description, owner_id) VALUES ($1, $2, $3) RETURNING *",
@@ -105,7 +106,6 @@ class NotesService {
         "UPDATE notes SET task_id = $1 WHERE id = $2 RETURNING *",
         [task_id, note_id]
       );
-      console.log(result)
       if (result.rows.length > 0) {
         return result.rows[0];
       } else {

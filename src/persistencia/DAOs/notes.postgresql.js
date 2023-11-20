@@ -36,9 +36,9 @@ export default class NoteManager {
   async createNote(owner_id, title, description) {
     try {
       const newNote = await notesService.createNote(
-        owner_id,
         title,
-        description
+        description,
+        owner_id
       );
       let response;
       newNote.error
@@ -58,11 +58,12 @@ export default class NoteManager {
       const newNote = await this.createNote(owner_id, title, description);
       newNote.error
         ? (response = { error: true, message: newNote.data })
-        : (response = { success: true, data: newNote.data });
+        : (response = { success: true});
+      // Agregar la nota
       const noteAdded = await notesService.addTaskToNote(newNote?.id, task_id);
       noteAdded.error
         ? (response = { error: true, message: noteAdded.data })
-        : (response = { success: true, data: noteAdded.data });
+        : (response = { success: true, data: noteAdded });
       return response;
     } catch (err) {
       console.log("ERROR addTaskToNote notes.postgres", err);
