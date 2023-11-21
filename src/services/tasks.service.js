@@ -41,26 +41,6 @@ class TasksService {
       return { error: true, data: err };
     }
   };
-  // Agrega una nota a la tarea
-  addNoteToTask = async (note_id, task_id) => {
-    try {
-      const result = await query(
-        "UPDATE tasks SET notes = $1 WHERE id = $2 RETURNING *",
-        [note_id, task_id]
-      );
-      if (result.rows.length > 0) {
-        return result.rows[0];
-      } else {
-        return {
-          error: true,
-          data: "No se encontró la tarea con el ID proporcionado.",
-        };
-      }
-    } catch (err) {
-      return { error: true, data: err.message };
-    }
-  };
-
   // Actualiza una tarea existente
   updateTask = async (taskId, updatedTask) => {
     const { name, is_completed } = updatedTask;
@@ -105,9 +85,11 @@ class TasksService {
   // Obtiene las notas de una tarea
   getNotesOfTask = async (task_id) => {
     try {
-      const result = await query("SELECT n.* FROM tasks t INNER JOIN notes n ON t.notes = n.id WHERE t.id = $1", [
-        task_id,
-      ]);
+      const result = await query(
+        "SELECT n.* FROM tasks t INNER JOIN notes n ON t.notes = n.id WHERE t.id = $1",
+        [task_id]
+      );
+      console.log(result);
       return result.rows;
     } catch (err) {
       return {

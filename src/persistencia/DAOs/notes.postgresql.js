@@ -1,3 +1,4 @@
+import { response } from "express";
 import notesService from "../../services/notes.services.js";
 
 export default class NoteManager {
@@ -32,9 +33,13 @@ export default class NoteManager {
     }
   }
   // Crea una nueva nota para un usuario
-  async createNote(owner_id, note) {
+  async createNote(owner_id, title, description) {
     try {
-      const newNote = await notesService.createNote(owner_id, note);
+      const newNote = await notesService.createNote(
+        title,
+        description,
+        owner_id
+      );
       let response;
       newNote.error
         ? (response = { error: true, message: newNote.data })
@@ -42,6 +47,26 @@ export default class NoteManager {
       return response;
     } catch (err) {
       console.log("ERROR createNote notes.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Crea y agrega una nota a una tarea
+  async addTaskToNote(owner_id, task_id, description, title) {
+    let response;
+    try {
+      // Crear nota
+      const newNote = await this.createNote(owner_id, title, description);
+      newNote.error
+        ? (response = { error: true, message: newNote.data })
+        : (response = { success: true });
+      // Agregar la nota
+      const noteAdded = await notesService.addTaskToNote(newNote?.id, task_id);
+      noteAdded.error
+        ? (response = { error: true, message: noteAdded.data })
+        : (response = { success: true, data: noteAdded });
+      return response;
+    } catch (err) {
+      console.log("ERROR addTaskToNote notes.postgres", err);
       return { error: true, data: err };
     }
   }
@@ -105,10 +130,28 @@ export default class NoteManager {
       return { error: true, data: err };
     }
   }
+  // Obtiene todas las notas con un task_id
+  async getNotesByTaskId(taskId) {
+    try {
+      const notes = await notesService.getAllNotesByTaskId(taskId);
+      return notes
+        ? notes
+        : {
+            error: true,
+            message: `No se enconraron notas para la tarea con el ID ${taskId}`,
+          };
+    } catch (err) {
+      console.log("ERROR getNoteByTaskId notes.postgres", err);
+      return { error: true, data: err };
+    }
+  }
   // Elimina la relacion entre un comentario y una nota
   async deleteCommentOfNote(noteId, commentId) {
     try {
-      const deleteComment = await notesService.deleteCommentNoteRelation(noteId, commentId)
+      const deleteComment = await notesService.deleteCommentNoteRelation(
+        noteId,
+        commentId
+      );
       return deleteComment
         ? deleteComment
         : {

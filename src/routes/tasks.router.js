@@ -6,7 +6,6 @@ import {
   getTaskById,
   getUserByTask,
   updateTaskById,
-  addNote,
   getAllNotesOfTasks
 } from "../contollers/tasks.controller.js";
 
@@ -25,9 +24,6 @@ router.get("/all/notes/:tid", getAllNotesOfTasks);
 
 // Crear una nueva tarea
 router.post("/create", createTask);
-
-// Agregar una nota a la tarea
-router.post("/add/note", addNote);
 
 // Actualizar una tarea por su ID
 router.put("/update/:tid", updateTaskById);

@@ -41,12 +41,11 @@ class NotesService {
   };
 
   // Crea una nueva nota
-  createNote = async (note, owner_id) => {
-    const { title, description, is_completed } = note;
+  createNote = async (title, description, owner_id) => {
     try {
       const noteCreated = await query(
-        "INSERT INTO notes (title, description, owner_id, is_completed) VALUES ($1, $2, $3, $4) RETURNING *",
-        [title, description, owner_id, is_completed]
+        "INSERT INTO notes (title, description, owner_id) VALUES ($1, $2, $3) RETURNING *",
+        [title, description, owner_id]
       );
       return noteCreated.rows[0];
     } catch (err) {
@@ -99,6 +98,26 @@ class NotesService {
     }
   };
 
+  // Método para el service de notes que agrega una tarea a una nota
+  addTaskToNote = async (note_id, task_id) => {
+    try {
+      const result = await query(
+        "UPDATE notes SET task_id = $1 WHERE id = $2 RETURNING *",
+        [task_id, note_id]
+      );
+      if (result.rows.length > 0) {
+        return result.rows[0];
+      } else {
+        return {
+          error: true,
+          data: "No se pudo agregar la tarea a la nota.",
+        };
+      }
+    } catch (err) {
+      return { error: true, data: err.message };
+    }
+  };
+
   // Obtiene el propietario de una nota
   getNoteOwner = async (noteId) => {
     try {
@@ -129,6 +148,20 @@ class NotesService {
       return { error: true, data: err };
     }
   };
+
+  // Obtiene todas notas con el mismo task_id
+  getAllNotesByTaskId = async (task_id) => {
+    try {
+      const notes = await query(
+        "SELECT n.id AS note_id, n.title, n.description, n.created_at AS note_created_at, t.id AS task_id, t.name AS task_name FROM notes n JOIN tasks t ON n.task_id = t.id WHERE n.task_id = $1; -- Reemplaza $1 con el task_id deseado",
+        [task_id]
+      );
+      return notes.rows;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
   // Eliminar la relación de un comentario a una nota
   deleteCommentNoteRelation = async (noteId, commentId) => {
     try {
