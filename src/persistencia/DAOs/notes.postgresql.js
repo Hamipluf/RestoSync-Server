@@ -50,7 +50,7 @@ export default class NoteManager {
       return { error: true, data: err };
     }
   }
-  // Crea y agreca una nota a una tarea
+  // Crea y agrega una nota a una tarea
   async addTaskToNote(owner_id, task_id, description, title) {
     let response;
     try {

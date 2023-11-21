@@ -12,13 +12,17 @@ describe("Notes services", () => {
   const newNoteData = {
     title: "Título de la Nota",
     description: "Descripción de la Nota",
-    is_completed: false,
+    owner_id: 2, // 2 es id de Ramiro
   };
   let noteIdCreated;
   let commentIdCreated;
 
   it("Create a note", async () => {
-    const result = await noteService.createNote(newNoteData, 2); // 2 es id de Ramiro
+    const result = await noteService.createNote(
+      newNoteData.title,
+      newNoteData.description,
+      newNoteData.owner_id
+    );
     noteIdCreated = result.id;
     expect(result).to.be.an("object");
     expect(result).to.have.property("id");
@@ -26,10 +30,23 @@ describe("Notes services", () => {
     expect(result)
       .to.have.property("description")
       .that.is.equal(newNoteData.description);
+    expect(result).to.have.property("is_completed").that.is.equal(false);
     expect(result)
-      .to.have.property("is_completed")
-      .that.is.equal(newNoteData.is_completed);
-    expect(result).to.have.property("owner_id").that.is.equal(2);
+      .to.have.property("owner_id")
+      .that.is.equal(newNoteData.owner_id);
+  });
+  it("Add task to note", async () => {
+    const taskId = 3; // Pedido celeste distribuidora
+    const result = await noteService.addTaskToNote(noteIdCreated, taskId);
+    noteIdCreated = result.id;
+    expect(result).to.be.an("object");
+    expect(result).to.have.property("id");
+    expect(result).to.have.property("title").that.be.an("string");
+    expect(result).to.have.property("description").that.be.an("string");
+    expect(result).to.have.property("created_at").that.be.an("date");
+    expect(result).to.have.property("is_completed").that.be.an("boolean");
+    expect(result).to.have.property("owner_id").that.be.an("number");
+    expect(result).to.have.property("task_id").that.is.equal(taskId);
   });
   it("Create comment of a note", async () => {
     const comment = "Comentario de Testeo";
