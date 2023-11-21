@@ -235,21 +235,23 @@ export const createTask = async (req, res) => {
 export const updateTaskById = async (req, res) => {
   const { tid } = req.params;
   if (req.method !== "PUT") {
-    res
+    return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
   if (!tid) {
-    res
+    return res
       .status(404)
       .json(customResponses.badResponse(404, "Falta el ID de la tarea."));
   }
 
   const { name, is_completed } = req.body;
-  if (!name || !is_completed) {
-    res
-      .status(404)
-      .json(customResponses.badResponse(404, "Faltan campos a completar."));
+  if (!name) {
+    if (is_completed !== undefined) {
+      return res
+        .status(404)
+        .json(customResponses.badResponse(404, "Faltan campos a completar."));
+    }
   }
   try {
     const updatedTask = await tasksManager.updateTask(parseInt(tid), req.body);
@@ -260,7 +262,7 @@ export const updateTaskById = async (req, res) => {
         .json(customResponses.badResponse(400, updatedTask.message));
     }
 
-    res
+    return res
       .status(200)
       .json(
         customResponses.responseOk(
