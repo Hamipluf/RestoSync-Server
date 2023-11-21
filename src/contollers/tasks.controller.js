@@ -254,7 +254,7 @@ export const updateTaskById = async (req, res) => {
   try {
     const updatedTask = await tasksManager.updateTask(parseInt(tid), req.body);
 
-    if ("error" in updatedTask) {
+    if (updatedTask.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, updatedTask.message));

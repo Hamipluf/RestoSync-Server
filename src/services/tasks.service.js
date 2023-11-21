@@ -44,10 +44,11 @@ class TasksService {
   // Actualiza una tarea existente
   updateTask = async (taskId, updatedTask) => {
     const { name, is_completed } = updatedTask;
+    const updated_at = new Date()
     try {
       const taskUpdated = await query(
-        "UPDATE tasks SET name = $1, is_completed = $2 WHERE id = $3 RETURNING *",
-        [name, is_completed, taskId]
+        "UPDATE tasks SET name = $1, is_completed = $2, updated_at = $3 WHERE id = $4 RETURNING *",
+        [name, is_completed, updated_at, taskId]
       );
       return taskUpdated.rows[0];
     } catch (err) {

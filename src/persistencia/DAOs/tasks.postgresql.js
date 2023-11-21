@@ -46,9 +46,9 @@ export default class TaskManager {
     try {
       const updated = await tasksService.updateTask(taskId, updatedTask);
       let response;
-      updated.error
-        ? (response = { error: true, message: updated.data })
-        : (response = updated);
+      updated
+        ? (response = updated)
+        : (response = { error: true, message: `No se encontro la tarea con el id ${taskId}` });
       return response;
     } catch (err) {
       console.log("ERROR updateTask tasks.postgres", err);
