@@ -60,9 +60,12 @@ export default class TaskManager {
     try {
       const deleted = await tasksService.deleteTask(taskId);
       let response;
-      deleted.error
-        ? (response = { error: true, message: deleted.data })
-        : (response = deleted);
+      deleted
+        ? (response = deleted)
+        : (response = {
+            error: true,
+            message: `No existe una tarea con el id ${taskId}`,
+          });
       return response;
     } catch (err) {
       console.log("ERROR deleteTask tasks.postgres", err);

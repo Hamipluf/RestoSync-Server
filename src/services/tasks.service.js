@@ -89,7 +89,6 @@ class TasksService {
         "SELECT n.* FROM tasks t INNER JOIN notes n ON t.notes = n.id WHERE t.id = $1",
         [task_id]
       );
-      console.log(result);
       return result.rows;
     } catch (err) {
       return {

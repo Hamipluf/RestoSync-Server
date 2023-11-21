@@ -292,8 +292,8 @@ export const deleteTaskById = async (req, res) => {
 
   try {
     const deletedTask = await tasksManager.deleteTask(parseInt(tid));
-
-    if ("error" in deletedTask) {
+    // console.log(deletedTask);
+    if (deletedTask.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, deletedTask.message));
