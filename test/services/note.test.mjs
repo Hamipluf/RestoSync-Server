@@ -14,6 +14,7 @@ describe("Notes services", () => {
     description: "Descripción de la Nota",
     owner_id: 2, // 2 es id de Ramiro
   };
+  const taskId = 3; // Pedido celeste distribuidora
   let noteIdCreated;
   let commentIdCreated;
 
@@ -36,7 +37,6 @@ describe("Notes services", () => {
       .that.is.equal(newNoteData.owner_id);
   });
   it("Add task to note", async () => {
-    const taskId = 3; // Pedido celeste distribuidora
     const result = await noteService.addTaskToNote(noteIdCreated, taskId);
     noteIdCreated = result.id;
     expect(result).to.be.an("object");
@@ -87,6 +87,19 @@ describe("Notes services", () => {
       expect(note).to.have.property("created_at").that.is.a("date");
       expect(note).to.have.property("is_completed").that.is.a("boolean");
       expect(note).to.have.property("owner_id").that.is.a("number");
+    });
+  });
+  it("Get all note by task_id", async () => {
+    const result = await noteService.getAllNotesByTaskId(taskId)
+    expect(result).to.be.an("array");
+    result.forEach((note) => {
+      expect(note).to.be.an("object");
+      expect(note).to.have.property("note_id").that.is.a("number");
+      expect(note).to.have.property("title").that.is.a("string");
+      expect(note).to.have.property("description").that.is.a("string");
+      expect(note).to.have.property("note_created_at").that.is.a("date");
+      expect(note).to.have.property("task_id").that.is.a("number");
+      expect(note).to.have.property("task_name").that.is.a("string");
     });
   });
   it("Get note by id", async () => {

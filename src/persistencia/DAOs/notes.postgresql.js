@@ -58,7 +58,7 @@ export default class NoteManager {
       const newNote = await this.createNote(owner_id, title, description);
       newNote.error
         ? (response = { error: true, message: newNote.data })
-        : (response = { success: true});
+        : (response = { success: true });
       // Agregar la nota
       const noteAdded = await notesService.addTaskToNote(newNote?.id, task_id);
       noteAdded.error
@@ -127,6 +127,21 @@ export default class NoteManager {
           };
     } catch (err) {
       console.log("ERROR getNoteOwner notes.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Obtiene todas las notas con un task_id
+  async getNotesByTaskId(taskId) {
+    try {
+      const notes = await notesService.getAllNotesByTaskId(taskId);
+      return notes
+        ? notes
+        : {
+            error: true,
+            message: `No se enconraron notas para la tarea con el ID ${taskId}`,
+          };
+    } catch (err) {
+      console.log("ERROR getNoteByTaskId notes.postgres", err);
       return { error: true, data: err };
     }
   }

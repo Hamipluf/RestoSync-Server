@@ -319,7 +319,6 @@ export const addCommentToNote = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
 // Obtiene todos los comentarios de una nota
 export const getAllCommentsByNoteId = async (req, res) => {
   const { nid } = req.params;
@@ -351,6 +350,40 @@ export const getAllCommentsByNoteId = async (req, res) => {
       );
   } catch (error) {
     console.error("Error al obtener comentarios de la nota:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Obtiene todos los comentarios de una nota
+export const getAllNotesByTaskId = async (req, res) => {
+  const { tid } = req.params;
+
+  if (req.method !== "GET") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+
+  if (!tid) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Falta el ID de la tarea"));
+  }
+
+  try {
+    const notes = await notesManager.getNotesByTaskId(parseInt(tid));
+    if (notes.error) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, notes.message));
+    }
+
+    res
+      .status(200)
+      .json(customResponses.responseOk(200, "Notas encontradas", notes));
+  } catch (error) {
+    console.error("Error al obtener las notas de la tarea:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));

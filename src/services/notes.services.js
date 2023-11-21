@@ -148,6 +148,20 @@ class NotesService {
       return { error: true, data: err };
     }
   };
+
+  // Obtiene todas notas con el mismo task_id
+  getAllNotesByTaskId = async (task_id) => {
+    try {
+      const notes = await query(
+        "SELECT n.id AS note_id, n.title, n.description, n.created_at AS note_created_at, t.id AS task_id, t.name AS task_name FROM notes n JOIN tasks t ON n.task_id = t.id WHERE n.task_id = $1; -- Reemplaza $1 con el task_id deseado",
+        [task_id]
+      );
+      return notes.rows;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
   // Eliminar la relación de un comentario a una nota
   deleteCommentNoteRelation = async (noteId, commentId) => {
     try {
