@@ -30,12 +30,12 @@ class ProductsService {
     }
   };
   // Crea un nuevo producto en una tienda
-  createProduct = async (storeId, product) => {
-    const { title, description, price, stock_quantity, category } = product;
+  createProduct = async (product) => {
+    const { title, description, price, stock_quantity, category, store_id } = product;
     try {
       const productCreated = await query(
         "INSERT INTO products (title, description, price, stock_quantity, category, store_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-        [title, description, price, stock_quantity, category, storeId]
+        [title, description, price, stock_quantity, category, store_id]
       );
       return productCreated.rows[0];
     } catch (err) {
