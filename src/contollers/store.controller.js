@@ -53,7 +53,7 @@ export const getAllStores = async (req, res) => {
   }
 };
 // Obtener las tiendas de un user
-export const getStoreOfUser = async (req, res) => { 
+export const getStoreOfUser = async (req, res) => {
   const { oid } = req.params;
   if (req.method !== "GET") {
     res
@@ -82,21 +82,9 @@ export const getStoreOfUser = async (req, res) => {
         );
     }
 
-    // Eliminar espacios en blanco sobrantes de las propiedades de cada tienda
-    const formattedStores = stores.map((store) => {
-      for (const key in store) {
-        if (typeof store[key] === "string") {
-          store[key] = store[key].trim();
-        }
-      }
-      return store;
-    });
-
     res
       .status(200)
-      .json(
-        customResponses.responseOk(200, "Tiendas encontradas", formattedStores)
-      );
+      .json(customResponses.responseOk(200, "Tienda encontradas", store));
   } catch (error) {
     console.error("Error al obtener los registros:", error);
     return res
