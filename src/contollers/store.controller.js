@@ -61,8 +61,8 @@ export const getStoreOfUser = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
   try {
-    const stores = await storeManager.getStoreOfUser(parseInt(oid));
-    if (stores.length === 0) {
+    const store = await storeManager.getStoreOfUser(parseInt(oid));
+    if (store.length === 0) {
       return res
         .status(404)
         .json(
@@ -70,7 +70,7 @@ export const getStoreOfUser = async (req, res) => {
         );
     }
 
-    if ("error" in stores) {
+    if (store.error) {
       return res
         .status(400)
         .json(

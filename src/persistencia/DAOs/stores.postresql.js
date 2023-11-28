@@ -30,7 +30,7 @@ export default class StoreManager {
       const store = await storesService.getStoreOfUser(ownerId);
       return store
         ? store
-        : { error: true, message: `El user ${ownerId} no posee tiendas.` };
+        : { error: true, message: `El user ${ownerId} no posee tienda.` };
     } catch (err) {
       console.log("ERROR getStoreOfUser stores.postgres", err);
       return { error: true, data: err };

@@ -18,7 +18,7 @@ class StoresService {
   getStoreOfUser = async (owner_id) => {
     try {
       const stores = await query("SELECT * FROM stores WHERE owner_id = $1", [owner_id]);
-      return stores.rows;
+      return stores.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }

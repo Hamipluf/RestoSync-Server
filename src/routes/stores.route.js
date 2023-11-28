@@ -18,7 +18,7 @@ router.get("/", getAllStores);
 // Obtener una tienda por su ID
 router.get("/one/:sid", getStoreById);
 
-// Obtener el owner de una tienda
+// Obtener la tienda de un user
 router.get("/owner/:oid", getStoreOfUser);
 
 // Obtener los productos de una tienda por su ID
