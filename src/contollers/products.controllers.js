@@ -126,13 +126,17 @@ export const getStoreProduct = async (req, res) => {
 };
 // Crear un producto
 export const createProduct = async (req, res) => {
-  const { sid } = req.params;
   if (req.method !== "POST") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-  if (!sid) {
+
+  const { title, stock_quantity, price, store_id } = req.body;
+  if (!title || !stock_quantity || !price) {
+    return { error: true, message: "Faltan campos a completar." };
+  }
+  if (!store_id) {
     return res
       .status(404)
       .json(
@@ -143,18 +147,10 @@ export const createProduct = async (req, res) => {
       );
   }
 
-  const { title, description, stock_quantity, category, price } = req.body;
-  if (!title || !stock_quantity || !price) {
-    return { error: true, message: "Faltan campos a completar." };
-  }
-
   try {
-    const createdProduct = await productManager.registerProduct(
-      parseInt(sid),
-      req.body
-    );
+    const createdProduct = await productManager.registerProduct(req.body);
 
-    if ("error" in createdProduct) {
+    if (createProduct.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, createdProduct.message));

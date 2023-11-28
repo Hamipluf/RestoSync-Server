@@ -15,12 +15,12 @@ describe("Products services", () => {
     price: "4500",
     stock_quantity: 10,
     category: "Nuevos",
+    store_id: 1, // Caballito
   };
   let productIdCreated;
 
   it("Create product", async () => {
-    const storeId = 1; // Caballito
-    const result = await productService.createProduct(storeId, newProductData);
+    const result = await productService.createProduct(newProductData);
     productIdCreated = result.id;
     expect(result).to.be.an("object");
     expect(result).to.have.property("id");
@@ -29,7 +29,9 @@ describe("Products services", () => {
     expect(result).to.have.property("price").that.is.a("string");
     expect(result).to.have.property("stock_quantity").that.is.a("number");
     expect(result).to.have.property("category").that.is.a("string");
-    expect(result).to.have.property("store_id").that.is.a("number");
+    expect(result)
+      .to.have.property("store_id")
+      .that.is.equal(newProductData.store_id);
   });
   it("Update product", async () => {
     const updatedData = {

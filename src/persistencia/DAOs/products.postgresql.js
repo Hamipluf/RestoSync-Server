@@ -27,24 +27,16 @@ export default class ProductManager {
     }
   }
   // Registra un nuevo producto para una tienda
-  async registerProduct(storeId, product) {
-    const { title, description, price, stock_quantity, category } = product;
+  async registerProduct(product) {
     try {
-      const productData = {
-        title,
-        description,
-        price,
-        stock_quantity,
-        category,
-      };
-      const newProduct = await productsService.createProduct(
-        storeId,
-        productData
-      );
+      const newProduct = await productsService.createProduct(product);
       let response;
-      newProduct.error
-        ? (response = { error: true, message: newProduct.data })
-        : (response = newProduct);
+      newProduct
+        ? (response = newProduct)
+        : (response = {
+            error: true,
+            message: "No se pudo crear el producto.",
+          });
       return response;
     } catch (err) {
       console.log("ERROR registerProduct products.postgres", err);
@@ -87,7 +79,6 @@ export default class ProductManager {
   }
   // Obtiene la tienda a la que pertenece un producto
   async getProductStore(productId) {
-  
     try {
       const store = await productsService.getProductStore(productId);
       return store
