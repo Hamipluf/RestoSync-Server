@@ -26,6 +26,6 @@ router.post("/create", createProduct);
 router.put("/udapte/:pid", updateProduct);
 
 // Eliminar un producto por ID
-router.delete("/delete/:id", deleteProduct);
+router.delete("/delete/:pid", deleteProduct);
 
 export default router;

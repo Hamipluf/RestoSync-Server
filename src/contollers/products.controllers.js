@@ -212,7 +212,7 @@ export const updateProduct = async (req, res) => {
       productData
     );
 
-    if ("error" in updatedProduct) {
+    if (updateProduct.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, updatedProduct.message));
@@ -255,7 +255,7 @@ export const deleteProduct = async (req, res) => {
   try {
     const deletedProduct = await productManager.deleteProduct(parseInt(pid));
 
-    if ("error" in deletedProduct) {
+    if (deleteProduct.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, deletedProduct.message));
