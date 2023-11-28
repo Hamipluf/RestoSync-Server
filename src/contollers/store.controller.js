@@ -107,7 +107,7 @@ export const getStoreById = async (req, res) => {
   }
   try {
     const store = await storeManager.getStoreById(parseInt(sid));
-    if ("error" in store) {
+    if (store.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, store.message));
@@ -144,11 +144,19 @@ export const createStore = async (req, res) => {
       .status(400)
       .json(customResponses.badResponse(400, "Faltan campos a completar"));
   }
+  // Expresión regular para validar un CUIT argentino
+  const cuitRegex = /^\d{2}-\d{8}-\d{1}$/;
+  if (!cuitRegex.test(cuit)) {
+    return res.status(400).json({
+      status: 400,
+      message: "El CUIT no está en el formato correcto (XX-XXXXXXXX-X)",
+    });
+  }
 
   try {
     const newStore = await storeManager.registerStore(req.body);
 
-    if ("error" in newStore) {
+    if (newStore.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, newStore.message));
