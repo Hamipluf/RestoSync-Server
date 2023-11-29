@@ -18,7 +18,7 @@ router.get("/one/:uid", getEmployeeById);
 router.get("/store/:eid", getEmployeeStore);
 
 // Asigna un empleado a una tienda
-router.post("/create", assignEmployee);
+router.post("/assign", assignEmployee);
 
 // Eliminar un empleado por su ID
 router.delete("/delete/:eid", removeEmployee);

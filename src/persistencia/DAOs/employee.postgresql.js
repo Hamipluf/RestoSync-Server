@@ -30,12 +30,10 @@ export default class EmployeeManager {
     }
   }
   // Asigna un empleado a una tienda
-  async assignEmployeeToStore(store_id, user_id) {
-      try {
-      const assignment = await employeesService.addEmployeeToStore(
-        store_id,
-        user_id
-      );
+  async assignEmployeeToStore(employee) {
+    try {
+      const assignment = await employeesService.addEmployeeToStore(employee);
+     
       let response;
       assignment.error
         ? (response = { error: true, message: assignment.data })
@@ -48,7 +46,6 @@ export default class EmployeeManager {
   }
   // Elimina un empleado por su ID
   async removeEmployee(employeeId) {
-  
     try {
       const removed = await employeesService.removeEmployeeFromStore(
         employeeId
@@ -65,7 +62,7 @@ export default class EmployeeManager {
   }
   // Obtiene la tienda a la que pertenece un empleado
   async getEmployeeStore(employeeId) {
-       try {
+    try {
       const store = await employeesService.getEmployeeStore(employeeId);
       return store
         ? store

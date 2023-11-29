@@ -12,22 +12,21 @@ describe("Employees services", () => {
   let employeeIdCreated;
   const newEmployeeData = {
     store_id: 1, // Usina Caballito
-    user_id: 2, // Ramiro
+    role: "camarero",
+    name: "Test1",
+    disponibility: ["LU", "MA", "MI"],
   };
   it("Assign employee to store", async () => {
-    const result = await employeesService.addEmployeeToStore(
-      newEmployeeData.user_id,
-      newEmployeeData.store_id
-    );
+    const result = await employeesService.addEmployeeToStore(newEmployeeData);
     employeeIdCreated = result.id;
     expect(result).to.be.an("object");
     expect(result).to.have.property("id");
-    expect(result)
-      .to.have.property("user_id")
-      .that.is.equal(newEmployeeData.user_id);
+    expect(result).to.have.property("role").that.is.equal(newEmployeeData.role);
+    expect(result).to.have.property("name").that.is.equal(newEmployeeData.name);
     expect(result)
       .to.have.property("store_id")
       .that.is.equal(newEmployeeData.store_id);
+    expect(result.disponibility).to.be.an("array");
   });
   it("Get all employees of store", async () => {
     const storeId = 1; // Usina Caballito
@@ -37,11 +36,11 @@ describe("Employees services", () => {
       expect(user).to.be.an("object");
       expect(user).to.have.property("id").that.is.a("number");
       expect(user).to.have.property("name").that.is.a("string");
-      expect(user).to.have.property("last_name").that.is.a("string");
-      expect(user).to.have.property("email").that.is.a("string");
-      expect(user).to.have.property("role").that.is.a("number");
-      expect(user).to.have.property("username").that.is.a("string");
-      expect(user).to.have.property("photos").that.is.null;
+      expect(user).to.have.property("role").that.is.a("string");
+      expect(user).to.have.property("disponibility").that.is.a("array");
+      expect(user)
+        .to.have.property("store_id")
+        .that.is.equal(newEmployeeData.store_id);
     });
   });
   it("Get an employee by id", async () => {
@@ -49,13 +48,16 @@ describe("Employees services", () => {
     expect(result).to.be.an("object");
     expect(result).to.have.property("id").that.is.a("number");
     expect(result).to.have.property("name").that.is.a("string");
-    expect(result).to.have.property("last_name").that.is.a("string");
-    expect(result).to.have.property("email").that.is.a("string");
-    expect(result).to.have.property("role").that.is.a("number");
-    expect(result).to.have.property("username").that.is.a("string");
+    expect(result).to.have.property("role").that.is.a("string");
+    expect(result).to.have.property("disponibility").that.is.a("array");
+    expect(result)
+      .to.have.property("store_id")
+      .that.is.equal(newEmployeeData.store_id);
   });
   it("Get store of an employee", async () => {
-    const result = await employeesService.getEmployeeStore(newEmployeeData.user_id);
+    const result = await employeesService.getEmployeeStore(
+      newEmployeeData.store_id
+    );
     expect(result).to.be.an("object");
     expect(result).to.have.property("id").that.is.a("number");
     expect(result).to.have.property("name").that.is.a("string");

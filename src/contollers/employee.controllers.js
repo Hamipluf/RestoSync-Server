@@ -148,16 +148,17 @@ export const assignEmployee = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { user_id, store_id } = req.body;
-  if (!user_id || !store_id) {
-    return res
+
+  const { role, name, disponibility, store_id } = req.body;
+  if (!role || !name  || !store_id) {
+    return res 
       .status(404)
       .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
   try {
-    const newEmployee = await employeesManager.assignEmployeeToStore(user_id, store_id);
+    const newEmployee = await employeesManager.assignEmployeeToStore(req.body);
 
-    if ("error" in newEmployee) {
+    if (newEmployee.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, newEmployee.message));
