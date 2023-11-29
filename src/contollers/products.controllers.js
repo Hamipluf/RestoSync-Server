@@ -180,35 +180,28 @@ export const updateProduct = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-  const { title, description, stock_quantity, category, price, product_id } =
+  const { title, description, stock_quantity, category, price, store_id } =
     req.body;
-
+  const { pid } = req.params;
   if (
     !title ||
     !stock_quantity ||
     !price ||
     !description ||
     !category ||
-    !product_id
+    !store_id
   ) {
-    return { error: true, message: "Faltan campos a completar." };
+    return res
+      .status(405)
+      .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
-
-  const productData = {
-    title,
-    description,
-    stock_quantity,
-    category,
-    price,
-  };
 
   try {
     const updatedProduct = await productManager.updateProduct(
-      parseInt(product_id),
-      productData
+      parseInt(pid),
+      req.body
     );
-
-    if (updateProduct.error) {
+    if (updatedProduct.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, updatedProduct.message));
