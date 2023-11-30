@@ -5,6 +5,7 @@ import {
   getEmployeeById,
   getEmployeeStore,
   removeEmployee,
+  updateEmployee,
 } from "../contollers/employee.controllers.js";
 
 const router = express.Router();
@@ -19,6 +20,9 @@ router.get("/store/:eid", getEmployeeStore);
 
 // Asigna un empleado a una tienda
 router.post("/assign", assignEmployee);
+
+// Asigna un empleado a una tienda
+router.put("/update/:eid", updateEmployee);
 
 // Eliminar un empleado por su ID
 router.delete("/delete/:eid", removeEmployee);

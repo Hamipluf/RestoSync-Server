@@ -54,6 +54,25 @@ describe("Employees services", () => {
       .to.have.property("store_id")
       .that.is.equal(newEmployeeData.store_id);
   });
+  it("Update an employee", async () => {
+    const updatedEmployeeData = {
+      role: "cocina",
+      name: "Test2",
+      disponibility: ["LU", "MA", "MI", "JU", "VI"],
+    };
+    const result = await employeesService.updateEmployeeInStore(
+      updatedEmployeeData,
+      employeeIdCreated
+    );
+    expect(result).to.be.an("object");
+    expect(result).to.have.property("id").that.is.equal(employeeIdCreated);
+    expect(result).to.have.property("role").that.is.equal(updatedEmployeeData.role);
+    expect(result).to.have.property("name").that.is.equal(updatedEmployeeData.name);
+    expect(result)
+      .to.have.property("store_id")
+      .that.is.equal(newEmployeeData.store_id);
+    expect(result.disponibility).to.deep.equal(updatedEmployeeData.disponibility);
+  });
   it("Get store of an employee", async () => {
     const result = await employeesService.getEmployeeStore(
       newEmployeeData.store_id

@@ -45,6 +45,21 @@ class EmployeesService {
     }
   };
 
+  // Actualiza un empleado
+  updateEmployeeInStore = async (employee, eid) => {
+    const { role, name, disponibility } = employee;
+    try {
+      const employeeUpdated = await query(
+        "UPDATE employees SET role = $1, name = $2, disponibility = $3 WHERE id = $4 RETURNING *",
+        [role, name, disponibility, eid]
+      );
+
+      return employeeUpdated.rows[0];
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+
   // Elimina un empleado de un store por su ID
   removeEmployeeFromStore = async (employeeId) => {
     try {

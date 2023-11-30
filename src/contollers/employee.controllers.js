@@ -148,10 +148,9 @@ export const assignEmployee = async (req, res) => {
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
 
-
   const { role, name, disponibility, store_id } = req.body;
-  if (!role || !name  || !store_id) {
-    return res 
+  if (!role || !name || !store_id) {
+    return res
       .status(404)
       .json(customResponses.badResponse(404, "Faltan campos a completar."));
   }
@@ -180,6 +179,50 @@ export const assignEmployee = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Actualiza un empleado
+export const updateEmployee = async (req, res) => {
+  if (req.method !== "PUT") {
+    return res
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
+  }
+  const { eid } = req.params;
+  const { role, name, disponibility  } = req.body;
+  if (!role || !name || !disponibility) {
+    return res
+      .status(404)
+      .json(customResponses.badResponse(404, "Faltan campos a completar."));
+  }
+
+  try {
+    const updatedEmployee = await employeesManager.updateEmployee(
+      req.body,
+      parseInt(eid)
+    );
+
+    if (updatedEmployee.error) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, updatedEmployee.message));
+    }
+
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(
+          200,
+          "Empleado actualizado con éxito",
+          updatedEmployee
+        )
+      );
+  } catch (error) {
+    console.error("Error al actualizar el empleado:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+
 // Eliminar un empleado por su ID
 export const removeEmployee = async (req, res) => {
   const { eid } = req.params;

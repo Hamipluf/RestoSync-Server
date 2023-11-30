@@ -33,7 +33,7 @@ export default class EmployeeManager {
   async assignEmployeeToStore(employee) {
     try {
       const assignment = await employeesService.addEmployeeToStore(employee);
-     
+
       let response;
       assignment.error
         ? (response = { error: true, message: assignment.data })
@@ -44,6 +44,24 @@ export default class EmployeeManager {
       return { error: true, data: err };
     }
   }
+  // Actualiza un empleado
+  async updateEmployee(employee, eid) {
+    try {
+      const updatedEmployee = await employeesService.updateEmployeeInStore(
+        employee,
+        eid
+      );
+      let response;
+      updatedEmployee.error
+        ? (response = { error: true, message: updatedEmployee.data })
+        : (response = updatedEmployee);
+      return response;
+    } catch (err) {
+      console.log("ERROR updateEmployee employees.postgres", err);
+      return { error: true, data: err };
+    }
+  }
+
   // Elimina un empleado por su ID
   async removeEmployee(employeeId) {
     try {
