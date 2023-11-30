@@ -188,7 +188,7 @@ export const updateEmployee = async (req, res) => {
   }
   const { eid } = req.params;
   const { role, name, disponibility  } = req.body;
-  if (!role || !name || !disponibility) {
+  if (!role || !name) {
     return res
       .status(404)
       .json(customResponses.badResponse(404, "Faltan campos a completar."));
