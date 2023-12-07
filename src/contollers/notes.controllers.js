@@ -136,7 +136,6 @@ export const updateNoteById = async (req, res) => {
       .status(400)
       .json(customResponses.badResponse(405, "Falta el ID de la nota"));
   }
-  console.log(req.body);
   const { title, description, is_completed } = req.body;
   if (!title || !description || is_completed === undefined) {
     return res
