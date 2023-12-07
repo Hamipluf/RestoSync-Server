@@ -136,8 +136,9 @@ export const updateNoteById = async (req, res) => {
       .status(400)
       .json(customResponses.badResponse(405, "Falta el ID de la nota"));
   }
+  console.log(req.body);
   const { title, description, is_completed } = req.body;
-  if (!title || !description || !is_completed) {
+  if (!title || !description || is_completed === undefined) {
     return res
       .status(404)
       .json(customResponses.badResponse(404, "Faltan campos a completar"));
@@ -146,7 +147,7 @@ export const updateNoteById = async (req, res) => {
   try {
     const updatedNote = await notesManager.updateNote(parseInt(nid), req.body);
 
-    if ("error" in updatedNote) {
+    if (updatedNote.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, updatedNote.message));

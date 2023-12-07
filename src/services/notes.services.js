@@ -153,7 +153,7 @@ class NotesService {
   getAllNotesByTaskId = async (task_id) => {
     try {
       const notes = await query(
-        "SELECT n.id AS note_id, n.title, n.description, n.created_at AS note_created_at, n.is_completed, t.id AS task_id, t.name AS task_name FROM notes n JOIN tasks t ON n.task_id = t.id WHERE n.task_id = $1;",
+        "SELECT n.id AS note_id, n.title, n.description, n.created_at AS note_created_at, n.is_completed, n.owner_id, t.id AS task_id, t.name AS task_name FROM notes n JOIN tasks t ON n.task_id = t.id WHERE n.task_id = $1;",
         [task_id]
       );
       return notes.rows;
