@@ -41,7 +41,7 @@ export const getNoteById = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-// Obtener una nota por su ID
+// Obtener notas por user_id
 export const getNoteByUser = async (req, res) => {
   const { oid } = req.params;
   if (req.method !== "GET") {
@@ -238,7 +238,7 @@ export const getOwnerNote = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-// Agregar un comentario a una nota específica
+
 export const addTaskToNote = async (req, res) => {
   const { task_id, title, description, owner_id } = req.body;
   if (req.method !== "POST") {
@@ -355,7 +355,7 @@ export const getAllCommentsByNoteId = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-// Obtiene todos los comentarios de una nota
+// Obtiene todas las notas por task_id
 export const getAllNotesByTaskId = async (req, res) => {
   const { tid } = req.params;
 
