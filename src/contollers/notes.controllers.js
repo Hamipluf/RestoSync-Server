@@ -238,8 +238,8 @@ export const getOwnerNote = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-
-export const addTaskToNote = async (req, res) => {
+// Agrega una nota a la tarea
+export const addNoteToTask = async (req, res) => {
   const { task_id, title, description, owner_id } = req.body;
   if (req.method !== "POST") {
     return res
@@ -281,25 +281,26 @@ export const addTaskToNote = async (req, res) => {
 };
 // Agregar un comentario a una nota específica
 export const addCommentToNote = async (req, res) => {
-  const { comment, user_id, note_id } = req.body;
+  const { comment, user_id } = req.body;
+  const { nid } = req.params;
   if (req.method !== "POST") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  if (!note_id || !comment || !user_id) {
+  if (!comment || !user_id) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "Faltan campos a completar"));
   }
+  if (!nid) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Faltan El ID de la nota"));
+  }
 
   try {
-    const result = await notesManager.addCommentToNote(
-      parseInt(note_id),
-      comment,
-      user_id
-    );
+    const result = await notesManager.addCommentToNote(parseInt(nid), req.body);
 
     if ("error" in result) {
       return res
