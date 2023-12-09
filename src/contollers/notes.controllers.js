@@ -311,7 +311,7 @@ export const addCommentToNote = async (req, res) => {
     res
       .status(201)
       .json(
-        customResponses.responseOk(201, "Comentario agregado con éxito", comment)
+        customResponses.responseOk(201, "Comentario agregado con éxito", comment.data)
       );
   } catch (error) {
     console.error("Error al agregar comentario a la nota:", error);
