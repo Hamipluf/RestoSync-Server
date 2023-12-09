@@ -81,7 +81,8 @@ class NotesService {
   };
 
   // Agrega un comentario a una nota específica
-  addCommentToNote = async (note_id, comment, user_id) => {
+  addCommentToNote = async (note_id, commentData) => {
+    const { comment, user_id } = commentData;
     try {
       // Primero, creamos el comentario usando el servicio de comentarios (commentsService)
       const newComment = await commentsService.createComment(user_id, comment);
@@ -91,8 +92,10 @@ class NotesService {
         "INSERT INTO note_comments (note_id, comment_id) VALUES ($1, $2) RETURNING *",
         [note_id, commentId]
       );
-
-      return linkCommentToNote.rows[0];
+      const commentLinked = linkCommentToNote.rows;
+      return commentLinked < 1
+        ? { error: true, data: commentLinked[0] }
+        : commentLinked[0];
     } catch (err) {
       return { error: true, data: err };
     }

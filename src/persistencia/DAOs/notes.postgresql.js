@@ -71,16 +71,12 @@ export default class NoteManager {
     }
   }
   // Agrega un comentario a una nota específica
-  async addCommentToNote(noteId, comment, userId) {
+  async addCommentToNote(note_id, commentData) {
     try {
-      const result = await notesService.addCommentToNote(
-        noteId,
-        comment,
-        userId
-      );
+      const result = await notesService.addCommentToNote(note_id, commentData);
       return result.error
         ? { error: true, message: result.data }
-        : { success: true, commentId: result.data };
+        : { success: true, data: result };
     } catch (err) {
       console.log("ERROR addCommentToNote notes.postgres", err);
       return { error: true, data: err };

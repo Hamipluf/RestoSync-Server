@@ -9,7 +9,7 @@ import {
   addCommentToNote,
   getAllCommentsByNoteId,
   deleteCommentOfnote,
-  addTaskToNote,
+  addNoteToTask,
   getAllNotesByTaskId,
 } from "../contollers/notes.controllers.js";
 
@@ -33,10 +33,10 @@ router.get("/task/:tid", getAllNotesByTaskId);
 router.post("/create", createNote);
 
 // Agrega un comentario a la nota
-router.post("/add/comment", addCommentToNote);
+router.post("/add/comment/:nid", addCommentToNote);
 
-// agrega una tarea a la nota
-router.post("/add/task", addTaskToNote);
+// agrega una nota a la tarea
+router.post("/add/task", addNoteToTask);
 
 // Actualizar una nota por su ID
 router.put("/update/:nid", updateNoteById);
