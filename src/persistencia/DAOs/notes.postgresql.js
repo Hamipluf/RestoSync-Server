@@ -75,7 +75,7 @@ export default class NoteManager {
     try {
       const result = await notesService.addCommentToNote(note_id, commentData);
       return result.error
-        ? { error: true, message: result }
+        ? { error: true, message: result.data }
         : { success: true, data: result };
     } catch (err) {
       console.log("ERROR addCommentToNote notes.postgres", err);

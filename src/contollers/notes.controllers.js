@@ -300,18 +300,18 @@ export const addCommentToNote = async (req, res) => {
   }
 
   try {
-    const result = await notesManager.addCommentToNote(parseInt(nid), req.body);
+    const comment = await notesManager.addCommentToNote(parseInt(nid), req.body);
 
-    if ("error" in result) {
+    if (comment.error) {
       return res
         .status(400)
-        .json(customResponses.badResponse(400, result.message));
+        .json(customResponses.badResponse(400, comment.message));
     }
 
     res
       .status(201)
       .json(
-        customResponses.responseOk(201, "Comentario agregado con éxito", result)
+        customResponses.responseOk(201, "Comentario agregado con éxito", comment)
       );
   } catch (error) {
     console.error("Error al agregar comentario a la nota:", error);

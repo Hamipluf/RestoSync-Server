@@ -92,8 +92,10 @@ class NotesService {
         "INSERT INTO note_comments (note_id, comment_id) VALUES ($1, $2) RETURNING *",
         [note_id, commentId]
       );
-      const commentLinked = linkCommentToNote.rows[0];
-      return commentLinked;
+      const commentLinked = linkCommentToNote.rows;
+      return commentLinked < 1
+        ? { error: true, data: commentLinked[0] }
+        : commentLinked[0];
     } catch (err) {
       return { error: true, data: err };
     }
