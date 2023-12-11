@@ -1,5 +1,4 @@
 import usersServices from "../../services/users.services.js";
-import authManager from "../../utils/authManager.js";
 import { compareData, hashData } from "../../utils/hashData.js";
 export default class UserManager {
   // Obtiene todos los usuarios
@@ -47,13 +46,13 @@ export default class UserManager {
         // 1 user, 2 user premium, 3 odmin
         role: roleUser,
         username,
-        photos: null,        
+        photos: [],        
       };
       const newUser = await usersServices.createAnUser(userData);
       let response;
       newUser.error
         ? (response = { error: true, message: newUser.data })
-        : (response = newUser.rows[0]);
+        : (response = newUser);
 
       return response;
     } catch (err) {

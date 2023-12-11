@@ -42,7 +42,8 @@ class UsersService {
         "INSERT INTO users (name, last_name, email, password, role, username, photos) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
         [name, last_name, email, password, role, username, photos]
       );
-      return userCreated;
+      const user = userCreated.rows[0];
+      return user.length < 1 ? { error: true, data: user } : user;
     } catch (err) {
       return { error: true, data: err };
     }
@@ -50,7 +51,10 @@ class UsersService {
   // Crea un usuario
   deleteUser = async (uid) => {
     try {
-      const taskDeleted = await query("DELETE FROM users WHERE id = $1 RETURNING *", [uid]);
+      const taskDeleted = await query(
+        "DELETE FROM users WHERE id = $1 RETURNING *",
+        [uid]
+      );
       return taskDeleted.rows[0];
     } catch (err) {
       return { error: true, data: err };

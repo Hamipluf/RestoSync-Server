@@ -58,7 +58,7 @@ export const getOneById = async (req, res) => {
   }
   try {
     const userDB = await user.getUserById(id);
-    if ("error" in userDB) {
+    if (userDB.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, userDB.message));
@@ -68,12 +68,15 @@ export const getOneById = async (req, res) => {
         userDB[key] = userDB[key].trim();
       }
     }
+    console.log(userDB);
     const userResponse = {
       id: userDB.id,
       name: userDB.name,
-      lastname: userDB.lastname,
+      lastname: userDB.last_name,
+      username: userDB.username,
       email: userDB.email,
       role: userDB.role,
+      photos: userDB.photos,
     };
     res
       .status(200)
@@ -153,9 +156,7 @@ export const login = (req, res) => {
 export const authUser = (req, res) => {
   const currentUser = req.user;
   if (currentUser.error) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, currentUser.message));
+    return res.redirect(300, "/login");
   }
   res
     .status(200)

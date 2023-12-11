@@ -73,7 +73,7 @@ passport.use(
     },
     async (jwt_payload, done) => {
       const userDB = await userManager.getUserById(jwt_payload.id);
-      if (!userDB || !userDB.id) {
+      if (!userDB) {
         const response = {
           error: true,
           message: "No existe un user con ese token",
@@ -88,7 +88,6 @@ passport.use(
         role: userDB.role,
         email: userDB.email,
         photos: userDB.photos,
-        tasks: userDB.tasks,
       };
       done(null, insensitiveUser);
     }

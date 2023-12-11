@@ -1,7 +1,7 @@
 import customResponses from "../utils/customResponses.js";
 const isAdmin = (req, res, next) => {
-  // Verifica si el usuario está autenticado y tiene el rol "Admin"
-  if (req.user && req.user.role === "admin") {
+  // Verifica si el usuario está autenticado y tiene el rol 3 (Admin)
+  if (req.user && req.user.role === 3) {
     next();
   } else {
     res

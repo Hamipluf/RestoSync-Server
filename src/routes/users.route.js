@@ -7,6 +7,7 @@ import {
   authUser,
 } from "../contollers/users.controllers.js";
 import isAdmin from "../middlewares/isAdmin.middleware.js";
+import haveStore from "../middlewares/haveStore.middleware.js";
 import passport from "passport";
 const router = Router();
 // user autenticado
@@ -16,12 +17,18 @@ router.get(
     passReqToCallback: true,
     session: false,
   }),
+  haveStore,
   authUser
 );
 // Todos los users
 router.get("/get-all", getAll);
 // Solamente authenticados y administradores tienen acceso a un solo user
-router.get("/:id", isAdmin, getOneById);
+router.get(
+  "/:id",
+  passport.authenticate("JWT", { passReqToCallback: true, session: false }),
+  isAdmin,
+  getOneById
+);
 // Registrar user
 router.post(
   "/register",
@@ -29,6 +36,7 @@ router.post(
     passReqToCallback: true,
     session: false,
   }),
+  haveStore,
   register
 );
 // Logear user
@@ -38,6 +46,7 @@ router.post(
     passReqToCallback: true,
     session: false,
   }),
+  haveStore,
   login
 );
 
