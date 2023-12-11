@@ -60,6 +60,10 @@ class CommentsService {
   // Elimina un comentario por su ID
   deleteComment = async (commentId) => {
     try {
+      // Elimino las relaiones del comentario primerio
+      await query("DELETE FROM note_comments WHERE comment_id = $1", [
+        commentId,
+      ]);
       const commentDeleted = await query(
         "DELETE FROM comments WHERE id = $1 RETURNING *",
         [commentId]

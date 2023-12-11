@@ -252,7 +252,7 @@ export const deleteCommentById = async (req, res) => {
       parseInt(cid)
     );
 
-    if ("error" in deletedComment) {
+    if (deletedComment.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, deletedComment.message));
