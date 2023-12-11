@@ -134,7 +134,9 @@ export const createProduct = async (req, res) => {
 
   const { title, stock_quantity, price, store_id } = req.body;
   if (!title || !stock_quantity || !price) {
-    return { error: true, message: "Faltan campos a completar." };
+    return res
+      .status(404)
+      .json(customResponses.badResponse(400, "Falta campos a completar."));
   }
   if (!store_id) {
     return res
