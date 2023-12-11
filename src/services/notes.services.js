@@ -70,6 +70,8 @@ class NotesService {
   // Elimina una nota por su ID
   deleteNote = async (noteId) => {
     try {
+      // Primero eliminamos todos los comentarios de la nota para evitar error por clae foranea
+      await query("DELETE FROM note_comments WHERE note_id = $1", [noteId]);
       const noteDeleted = await query(
         "DELETE FROM notes WHERE id = $1 RETURNING *",
         [noteId]

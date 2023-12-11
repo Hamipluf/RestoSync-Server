@@ -266,3 +266,4 @@ export const deleteProduct = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// 75

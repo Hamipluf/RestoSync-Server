@@ -184,7 +184,7 @@ export const deleteNoteById = async (req, res) => {
   try {
     const deletedNote = await notesManager.deleteNote(parseInt(nid));
 
-    if ("error" in deletedNote) {
+    if (deletedNote.error) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, deletedNote.message));
