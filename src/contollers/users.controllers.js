@@ -130,7 +130,6 @@ export const login = (req, res) => {
   }
   const user = req.user;
   if (user.error) {
-    console.log("Error controller loguinUser");
     return res
       .status(404)
       .send(
@@ -138,18 +137,9 @@ export const login = (req, res) => {
       );
   }
   const token = authManager.generateToken(user);
-  const userResponse = {
-    id: user.id,
-    name: user.name,
-    last_name: user.last_name,
-    email: user.email,
-    username: user.username,
-    role: user.role,
-    photos: user.photos,
-    tasks: user.tasks,
-  };
+
   res.json(
-    customResponses.responseOk(200, "Bienvenido", { userResponse, token })
+    customResponses.responseOk(200, "Bienvenido", { user, token })
   );
 };
 // Autentica y recupera el user loggeado

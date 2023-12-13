@@ -17,7 +17,7 @@ class UsersService {
   // Obtiene un user dependiendo del user ID
   getUserById = async (uid) => {
     try {
-      const data = await query("SELECT * FROM users WHERE id = $1", [uid]);
+      const data = await query("SELECT id, name, last_name, email, username, photos, role FROM users WHERE id = $1", [uid]);
       const user = data.rows[0];
       return user;
     } catch (err) {
@@ -27,7 +27,7 @@ class UsersService {
   // Obtiene un user dependiendo del user Email
   getUserByEmail = async (email) => {
     try {
-      const data = await query("SELECT * FROM users WHERE email = $1", [email]);
+      const data = await query("SELECT id, name, last_name, email, username, photos, role FROM users WHERE email = $1", [email]);
       const user = data.rows[0];
       return user;
     } catch (err) {

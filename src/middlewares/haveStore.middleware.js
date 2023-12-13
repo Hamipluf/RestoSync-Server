@@ -11,7 +11,7 @@ const haveStore = async (req, res, next) => {
 
   if (store.error) {
     return res.send(
-      customResponses.badResponse(307, "No posee tiendas asociadas.")
+      customResponses.badResponse(307, "No posee tiendas asociadas.", user)
     );
   }
   // Si posee store pasa
