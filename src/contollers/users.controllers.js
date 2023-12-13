@@ -19,7 +19,7 @@ export const getAll = async (req, res) => {
         .json(customResponses.badResponse(404, "No hay users para devolver"));
     }
 
-    if ("error" in users) {
+    if (users.error) {
       return res
         .status(400)
         .json(
@@ -95,14 +95,8 @@ export const register = (req, res) => {
         customResponses.badResponse(400, user?.message || user?.data, undefined)
       );
   }
-  const token = authManager.generateToken(user);
 
-  res.json(
-    customResponses.responseOk(200, "User registrado con exito", {
-      user,
-      token,
-    })
-  );
+  res.json(customResponses.responseOk(200, "User registrado con exito", user.token));
 };
 // logear a un user
 export const login = (req, res) => {
@@ -119,9 +113,8 @@ export const login = (req, res) => {
         customResponses.badResponse(404, user?.message || user?.data, undefined)
       );
   }
-  const token = authManager.generateToken(user);
 
-  res.json(customResponses.responseOk(200, "Bienvenido", { user, token }));
+  res.json(customResponses.responseOk(200, "Bienvenido", user.token));
 };
 // Autentica y recupera el user loggeado
 export const authUser = (req, res) => {

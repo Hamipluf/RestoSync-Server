@@ -2,16 +2,20 @@ import StoreManager from "../persistencia/DAOs/stores.postresql.js";
 import customResponses from "../utils/customResponses.js";
 const storeManager = new StoreManager();
 const haveStore = async (req, res, next) => {
-  const user = req.user;
-  if (!user) {
+  const userAuth = req.user;
+  if (!userAuth) {
     return res.send(customResponses.badResponse(308, "No existe el usuario."));
   }
   //Comprobamos si el usuario tiene una tienda asociada a su cuenta de usuario
-  const store = await storeManager.getStoreOfUser(user.id);
+  const store = await storeManager.getStoreOfUser(userAuth.user.id);
 
   if (store.error) {
     return res.send(
-      customResponses.badResponse(307, "No posee tiendas asociadas.", user)
+      customResponses.badResponse(
+        307,
+        "No posee tiendas asociadas.",
+        userAuth.token
+      )
     );
   }
   // Si posee store pasa

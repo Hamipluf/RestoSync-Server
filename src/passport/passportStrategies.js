@@ -4,6 +4,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import UserManager from "../persistencia/DAOs/user.posgresql.js";
+import authManager from "../utils/authManager.js";
 const userManager = new UserManager();
 
 const cookie_secret = process.env.SECRET_COOKIE;
@@ -27,7 +28,12 @@ passport.use(
           const message = `No existe una cuenta con el email ${email}`;
           return done(message, false); // No existe en la database hay que registrarse
         }
-        return done(null, userDb);
+        const token = authManager.generateToken(userDb);
+        const usearAuth = {
+          user: userDb,
+          token,
+        };
+        return done(null, usearAuth);
       } catch (error) {
         done(error);
       }
@@ -45,7 +51,6 @@ passport.use(
     },
     async (req, email, password, done) => {
       try {
-     
         const userDB = await userManager.getUserByEmail(email);
         if (userDB) {
           const response = {
@@ -55,7 +60,12 @@ passport.use(
           return done(false, response);
         }
         const newUserDB = await userManager.registerUser(req.body);
-        done(null, newUserDB);
+        const token = authManager.generateToken(newUserDB);
+        const usearAuth = {
+          user: newUserDB,
+          token,
+        };
+        done(null, usearAuth);
       } catch (error) {
         done(error);
       }
@@ -80,16 +90,12 @@ passport.use(
         };
         return done(false, response);
       }
-      const insensitiveUser = {
-        id: userDB.id,
-        name: userDB.name,
-        last_name: userDB.last_name,
-        username: userDB.username,
-        role: userDB.role,
-        email: userDB.email,
-        photos: userDB.photos,
+      const token = authManager.generateToken(userDB);
+      const userAuth = {
+        user: userDB,
+        token,
       };
-      done(null, insensitiveUser);
+      done(null, userAuth);
     }
   )
 );
