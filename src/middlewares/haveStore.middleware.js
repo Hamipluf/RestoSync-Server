@@ -3,7 +3,7 @@ import customResponses from "../utils/customResponses.js";
 const storeManager = new StoreManager();
 const haveStore = async (req, res, next) => {
   const userAuth = req.user;
-  if (!userAuth) {
+  if (userAuth.error) {
     return res.send(customResponses.badResponse(308, "No existe el usuario."));
   }
   //Comprobamos si el usuario tiene una tienda asociada a su cuenta de usuario

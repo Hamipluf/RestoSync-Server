@@ -25,8 +25,11 @@ passport.use(
         };
         const userDb = await userManager.loginUser(userData);
         if (!userDb) {
-          const message = `No existe una cuenta con el email ${email}`;
-          return done(message, false); // No existe en la database hay que registrarse
+          const response = {
+            error: true,
+            message: `No existe una cuenta con el email ${email}`,
+          };
+          return done(false, response); // No existe en la database hay que registrarse
         }
         const token = authManager.generateToken(userDb);
         const usearAuth = {

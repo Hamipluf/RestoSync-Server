@@ -96,7 +96,11 @@ export const register = (req, res) => {
       );
   }
 
-  res.json(customResponses.responseOk(200, "User registrado con exito", user.token));
+  res.json(
+    customResponses.responseOk(200, "User registrado con exito", {
+      token: user.token,
+    })
+  );
 };
 // logear a un user
 export const login = (req, res) => {
@@ -114,7 +118,9 @@ export const login = (req, res) => {
       );
   }
 
-  res.json(customResponses.responseOk(200, "Bienvenido", user.token));
+  res.json(
+    customResponses.responseOk(200, "Bienvenido", { token: user.token })
+  );
 };
 // Autentica y recupera el user loggeado
 export const authUser = (req, res) => {
