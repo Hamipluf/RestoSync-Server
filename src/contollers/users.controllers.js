@@ -98,6 +98,7 @@ export const register = (req, res) => {
 
   res.json(
     customResponses.responseOk(200, "User registrado con exito", {
+      user: user.user.id,
       token: user.token,
     })
   );
@@ -119,7 +120,7 @@ export const login = (req, res) => {
   }
 
   res.json(
-    customResponses.responseOk(200, "Bienvenido", { token: user.token })
+    customResponses.responseOk(200, "Bienvenido", { token: user.token, user: user.user.id })
   );
 };
 // Autentica y recupera el user loggeado

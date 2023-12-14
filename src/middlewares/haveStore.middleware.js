@@ -12,6 +12,7 @@ const haveStore = async (req, res, next) => {
   if (store.error) {
     return res.send(
       customResponses.badResponse(307, "No posee tiendas asociadas.", {
+        user: userAuth.user.id,
         token: userAuth.token,
       })
     );
