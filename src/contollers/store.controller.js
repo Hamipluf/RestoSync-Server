@@ -138,8 +138,28 @@ export const createStore = async (req, res) => {
   }
 
   // Recibir y validar los datos de la nueva tienda desde req.body
-  const { name, company_name, address, cuit, owner_id } = req.body;
-  if (!name || !company_name || !address || !cuit || !owner_id) {
+  const {
+    name,
+    company_name,
+    address,
+    cuit,
+    owner_id,
+    city,
+    country,
+    state,
+    zipcode,
+  } = req.body;
+  if (
+    !name ||
+    !company_name ||
+    !address ||
+    !cuit ||
+    !owner_id ||
+    !city ||
+    !country ||
+    !state ||
+    !zipcode
+  ) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "Faltan campos a completar"));
@@ -147,10 +167,26 @@ export const createStore = async (req, res) => {
   // Expresión regular para validar un CUIT argentino
   const cuitRegex = /^\d{2}-\d{8}-\d{1}$/;
   if (!cuitRegex.test(cuit)) {
-    return res.status(400).json({
-      status: 400,
-      message: "El CUIT no está en el formato correcto (XX-XXXXXXXX-X)",
-    });
+    return res
+      .status(400)
+      .json(
+        customResponses.badResponse(
+          400,
+          "El CUIT no está en el formato correcto (XX-XXXXXXXX-X)"
+        )
+      );
+  }
+  // Expresión regular para validar un Codigo Postal argentino
+  const codigoPostalRegex = /^\d{4}[a-zA-Z]{0,3}$/;
+  if (!codigoPostalRegex.test(zipcode)) {
+    return res
+      .status(400)
+      .json(
+        customResponses.badResponse(
+          400,
+          "El código postal no está en el formato correcto (XXXX o XXXXaaa)"
+        )
+      );
   }
 
   try {

@@ -15,6 +15,9 @@ describe("Store services", () => {
     company_name: "Mi Empresa",
     address: "Dirección de la Tienda",
     cuit: "1234567890",
+    country: "Argentina",
+    state: "Capital Federal",
+    zipcode: "1034",
     owner_id: 2,
   };
   let storeCreatedId;
@@ -28,6 +31,10 @@ describe("Store services", () => {
     expect(result).to.have.property("address").that.is.a("string");
     expect(result).to.have.property("owner_id").that.is.a("number");
     expect(result).to.have.property("cuit").that.is.a("string");
+    expect(result).to.have.property("country").that.is.a("string");
+    expect(result).to.have.property("state").that.is.a("string");
+    expect(result).to.have.property("zipcode").that.is.a("string");
+    expect(result).to.have.property("owner_id").that.is.equal(newStoreData.owner_id);
   });
   it("Get all stores", async () => {
     // Obtener todas las tiendas

@@ -38,11 +38,8 @@ export default class StoreManager {
   }
   // Registra una nueva tienda
   async registerStore(store) {
-    const { name, company_name, address, cuit, owner_id } = store;
-
     try {
-      const storeData = { name, company_name, address, cuit, owner_id };
-      const newStore = await storesService.createStore(storeData);
+      const newStore = await storesService.createStore(store);
       let response;
       newStore.error
         ? (response = { error: true, message: newStore.data })

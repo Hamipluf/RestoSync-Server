@@ -17,12 +17,14 @@ class StoresService {
 
   getStoreOfUser = async (owner_id) => {
     try {
-      const stores = await query("SELECT * FROM stores WHERE owner_id = $1", [owner_id]);
+      const stores = await query("SELECT * FROM stores WHERE owner_id = $1", [
+        owner_id,
+      ]);
       return stores.rows[0];
     } catch (err) {
       return { error: true, data: err };
     }
-  }
+  };
 
   // Obtiene un store por su ID
   getStoreById = async (storeId) => {
@@ -37,11 +39,31 @@ class StoresService {
 
   // Crea un nuevo store
   createStore = async (store) => {
-    const { name, company_name, address, cuit, owner_id} = store;
+    const {
+      name,
+      company_name,
+      address,
+      cuit,
+      owner_id,
+      city,
+      country,
+      state,
+      zipcode,
+    } = store;
     try {
       const storeCreated = await query(
-        `INSERT INTO stores (name, company_name, address, cuit, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-        [name, company_name, address, cuit, owner_id]
+        `INSERT INTO stores (name, company_name, address, cuit, city, country, state, zipcode, owner_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+        [
+          name,
+          company_name,
+          address,
+          cuit,
+          city,
+          country,
+          state,
+          zipcode,
+          owner_id,
+        ]
       );
       return storeCreated.rows[0];
     } catch (err) {
@@ -66,7 +88,10 @@ class StoresService {
   // Elimina un store por su ID
   deleteStore = async (storeId) => {
     try {
-      const storeDeleted = await query("DELETE FROM stores WHERE id = $1 RETURNING *", [storeId]);
+      const storeDeleted = await query(
+        "DELETE FROM stores WHERE id = $1 RETURNING *",
+        [storeId]
+      );
       return storeDeleted.rows[0];
     } catch (err) {
       return { error: true, data: err };
@@ -76,24 +101,28 @@ class StoresService {
   // Obtiene todos los empleados de un store
   getStoreEmployees = async (storeId) => {
     try {
-      const employees = await query("SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM employees e JOIN users u ON e.user_id = u.id WHERE e.store_id = $1", [storeId]);
+      const employees = await query(
+        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM employees e JOIN users u ON e.user_id = u.id WHERE e.store_id = $1",
+        [storeId]
+      );
       return employees.rows;
     } catch (err) {
       return { error: true, data: err };
     }
-  }
+  };
 
   // Obtiene todos los productos de un store
   getStoreProducts = async (storeId) => {
     try {
-      const products = await query("SELECT * FROM products WHERE store_id = $1", [storeId]);
+      const products = await query(
+        "SELECT * FROM products WHERE store_id = $1",
+        [storeId]
+      );
       return products.rows;
     } catch (err) {
       return { error: true, data: err };
     }
-  }
-
-
+  };
 }
 
 const storesService = new StoresService();
