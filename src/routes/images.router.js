@@ -1,5 +1,5 @@
 import express from "express";
-import { uploadImage } from "../contollers/images.controller.js";
+import { uploadImage, getImage ,deleteImage} from "../contollers/images.controller.js";
 // Multer
 import { upload } from "../utils/config.js";
 // Passport
@@ -14,6 +14,22 @@ router.post(
     session: false,
   }),
   uploadImage
+);
+router.get(
+  "/get-one/:key",
+  passport.authenticate("JWT", {
+    passReqToCallback: true,
+    session: false,
+  }),
+  getImage
+);
+router.delete(
+  "/delete/:key",
+  passport.authenticate("JWT", {
+    passReqToCallback: true,
+    session: false,
+  }),
+  deleteImage
 );
 
 export default router;
