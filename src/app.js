@@ -14,6 +14,7 @@ import stores from "./routes/stores.route.js";
 import comments from "./routes/comments.router.js";
 import employee from "./routes/employee.route.js";
 import tasks from "./routes/tasks.router.js";
+import images from "./routes/images.router.js";
 // Passport
 import passport from "passport";
 import "./passport/passportStrategies.js";
@@ -48,6 +49,7 @@ app.use("/api/stores", stores);
 app.use("/api/comments", comments);
 app.use("/api/employees", employee);
 app.use("/api/tasks", tasks);
+app.use("/api/images", images);
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
