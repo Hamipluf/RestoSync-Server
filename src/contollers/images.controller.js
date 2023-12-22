@@ -105,7 +105,6 @@ export const deleteImage = async (req, res) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(apiResponse)
     if (apiResponse.data.success) {
       return res.status(200).json(apiResponse.data);
     } else {
