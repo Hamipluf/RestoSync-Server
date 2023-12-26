@@ -44,7 +44,7 @@ export const uploadImage = async (req, res) => {
       const savePhoto = await userManager.updateUserFieldById(
         user.id,
         "photos",
-        [...user.photos, apiResponse.data.data.Key]
+        apiResponse.data.data.Key
       );
       if (savePhoto.success) {
         return res.status(200).json(customResponses.badResponse(400, "No se pudo guardar la imagen.", savePhoto));
