@@ -39,15 +39,24 @@ export const uploadImage = async (req, res) => {
         },
       }
     );
+
     if (apiResponse.data.success) {
       // Guarda la key de la foto en el usuario correspondiente
       const savePhoto = await userManager.updateUserFieldById(
         user.id,
-        "photo",
+        "profile_photo",
         apiResponse.data.data.Key
       );
       if (savePhoto.success) {
-        return res.status(200).json(customResponses.badResponse(400, "No se pudo guardar la imagen.", savePhoto));
+        return res
+          .status(200)
+          .json(
+            customResponses.badResponse(
+              400,
+              "No se pudo guardar la imagen.",
+              savePhoto
+            )
+          );
       } else {
         return res.status(400).json(apiResponse.data);
       }
@@ -55,10 +64,23 @@ export const uploadImage = async (req, res) => {
       return res.status(400).json(apiResponse.data);
     }
   } catch (error) {
-    console.error("Error al obtener los registros:", error);
-    return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
+    if (data.code === 401) {
+      const data = error.response.data;
+      return res
+        .status(401)
+        .json(customResponses.badResponse(401, data.message));
+    } else {
+      console.log("Error al obtener los registros:", error);
+      return res
+        .status(500)
+        .json(
+          customResponses.badResponse(
+            500,
+            "Error en el servidor",
+            error.response
+          )
+        );
+    }
   }
 };
 // Obtiene una imagen
@@ -89,10 +111,23 @@ export const getImage = async (req, res) => {
       return res.status(400).json(apiResponse.data);
     }
   } catch (error) {
-    console.error("Error al obtener los registros:", error);
-    return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
+    if (data.code === 401) {
+      const data = error.response.data;
+      return res
+        .status(401)
+        .json(customResponses.badResponse(401, data.message));
+    } else {
+      console.log("Error al obtener los registros:", error);
+      return res
+        .status(500)
+        .json(
+          customResponses.badResponse(
+            500,
+            "Error en el servidor",
+            error.response
+          )
+        );
+    }
   }
 };
 // Elimina
@@ -126,9 +161,22 @@ export const deleteImage = async (req, res) => {
       return res.status(400).json(apiResponse.data);
     }
   } catch (error) {
-    console.error("Error al obtener los registros:", error);
-    return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
+    if (data.code === 401) {
+      const data = error.response.data;
+      return res
+        .status(401)
+        .json(customResponses.badResponse(401, data.message));
+    } else {
+      console.log("Error al obtener los registros:", error);
+      return res
+        .status(500)
+        .json(
+          customResponses.badResponse(
+            500,
+            "Error en el servidor",
+            error.response
+          )
+        );
+    }
   }
 };
