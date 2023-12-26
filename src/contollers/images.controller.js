@@ -11,12 +11,7 @@ export const uploadImage = async (req, res) => {
   const user = req.user.user;
   const token = req.user.token;
   const file = req.file;
-  const formData = new FormData();
-  const blob = new Blob([file.buffer], { type: file.mimetype });
-  formData.append("image", blob, {
-    filename: file.fieldname,
-    originalname: file.originalname,
-  });
+
   if (req.method !== "POST") {
     res
       .status(405)
@@ -29,6 +24,12 @@ export const uploadImage = async (req, res) => {
   }
 
   try {
+    const formData = new FormData();
+    const blob = new Blob([file.buffer], { type: file.mimetype });
+    formData.append("image", blob, {
+      filename: file.fieldname,
+      originalname: file.originalname,
+    });
     const apiResponse = await axios.post(
       `${url_bucket}/api/image/upload`,
       formData,
@@ -64,7 +65,7 @@ export const uploadImage = async (req, res) => {
       return res.status(400).json(apiResponse.data);
     }
   } catch (error) {
-    console.log("Error al obtener los registros:", error);
+    console.log("Error al obtener los registros:", error.response);
     return res
       .status(500)
       .json(
