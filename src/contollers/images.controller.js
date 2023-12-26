@@ -68,7 +68,7 @@ export const uploadImage = async (req, res) => {
       const data = error.response.data;
       return res
         .status(401)
-        .json(customResponses.badResponse(401, data.message));
+        .json(customResponses.badResponse(401, error.response.data?.message));
     } else {
       console.log("Error al obtener los registros:", error);
       return res
@@ -114,7 +114,7 @@ export const getImage = async (req, res) => {
     if (error && error.response.data?.code === 401) {
       return res
         .status(401)
-        .json(customResponses.badResponse(401, data.message));
+        .json(customResponses.badResponse(401, error.response.data?.message));
     } else {
       console.log("Error al obtener los registros:", error);
       return res
@@ -163,7 +163,7 @@ export const deleteImage = async (req, res) => {
     if (error && error.response.data?.code === 401) {
       return res
         .status(401)
-        .json(customResponses.badResponse(401, data.message));
+        .json(customResponses.badResponse(401, error.response.data?.message));
     } else {
       console.log("Error al obtener los registros:", error);
       return res
