@@ -65,7 +65,7 @@ export const uploadImage = async (req, res) => {
       return res.status(400).json(apiResponse.data);
     }
   } catch (error) {
-    console.log("Error al obtener los registros:", error.response);
+    console.log("Error al obtener los registros:", error);
     return res
       .status(500)
       .json(
