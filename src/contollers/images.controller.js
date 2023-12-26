@@ -64,7 +64,7 @@ export const uploadImage = async (req, res) => {
       return res.status(400).json(apiResponse.data);
     }
   } catch (error) {
-    if (error.response.data === 401) {
+    if (error && error.response.data?.code === 401) {
       const data = error.response.data;
       return res
         .status(401)
@@ -111,7 +111,7 @@ export const getImage = async (req, res) => {
       return res.status(400).json(apiResponse.data);
     }
   } catch (error) {
-    if (error.response.data.code === 401) {
+    if (error && error.response.data?.code === 401) {
       return res
         .status(401)
         .json(customResponses.badResponse(401, data.message));
@@ -160,7 +160,7 @@ export const deleteImage = async (req, res) => {
       return res.status(400).json(apiResponse.data);
     }
   } catch (error) {
-    if (error.response.data.code === 401) {
+    if (error && error.response.data?.code === 401) {
       return res
         .status(401)
         .json(customResponses.badResponse(401, data.message));
