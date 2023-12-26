@@ -3,6 +3,7 @@ import { config } from "dotenv";
 config();
 import customResponses from "../utils/customResponses.js";
 import UserManager from "../persistencia/DAOs/user.posgresql.js";
+import FormData from 'form-data';
 const userManager = new UserManager();
 
 const url_bucket = process.env.URL_SERVICE_BUCKET;
