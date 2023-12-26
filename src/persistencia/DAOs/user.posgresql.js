@@ -12,6 +12,7 @@ export default class UserManager {
       return { error: true, data: err };
     }
   }
+  // Obtiene un user por id
   async getUserById(uid) {
     if (!uid) {
       return { error: true, message: "Faltan campos a completar" };
@@ -26,6 +27,7 @@ export default class UserManager {
       return { error: true, data: err };
     }
   }
+  // Registra a un user nuevo
   async registerUser(user) {
     const { name, last_name, email, password, username } = user;
     if (!email || !password || !last_name || !name || !username) {
@@ -46,7 +48,7 @@ export default class UserManager {
         // 1 user, 2 user premium, 3 odmin
         role: roleUser,
         username,
-        photos: [],        
+        photos: [],
       };
       const newUser = await usersServices.createAnUser(userData);
       let response;
@@ -60,6 +62,7 @@ export default class UserManager {
       return { error: true, data: err };
     }
   }
+  // Obitiene un user por su email
   async getUserByEmail(email) {
     if (!email) {
       return { error: true, message: "Faltan campos a completar" };
@@ -72,6 +75,7 @@ export default class UserManager {
       return { error: true, data: err };
     }
   }
+  // Logea un usuario registrado
   async loginUser(user) {
     const { email, password } = user;
     if (!email || !password) {
@@ -88,6 +92,86 @@ export default class UserManager {
     } catch (error) {
       console.log("Error loginUser user.posgres", error);
       return { error: true, message: "No existe un user con ese email" };
+    }
+  }
+  // Actualiza un usuario
+  async updateUserById(uid, updatedUserData) {
+    try {
+      const user = await this.getUserById(uid);
+
+      if (!user || user.error) {
+        return {
+          error: true,
+          message: `No se puede encontrar el usuario con ID ${uid}`,
+        };
+      }
+
+      const updatedUser = { ...user, ...updatedUserData };
+      const result = await usersServices.updateUserById(uid, updatedUser);
+
+      if (result.error) {
+        return { error: true, message: "Error al actualizar el usuario" };
+      }
+
+      return result;
+    } catch (err) {
+      console.log("ERROR updateUserById users.posgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Actualiza un solo campo del user
+  async updateUserFieldById(uid, fieldName, fieldValue) {
+    try {
+      const user = await usersServices.getUserById(uid);
+
+      if (!user || user.error) {
+        return {
+          error: true,
+          message: `No se puede encontrar el usuario con ID ${uid}`,
+        };
+      }
+
+      const updatedUser = await usersServices.updateUserField(
+        uid,
+        fieldName,
+        fieldValue
+      );
+
+      if (updatedUser.error) {
+        return {
+          error: true,
+          message: "Error al actualizar el campo del usuario",
+        };
+      }
+
+      return updatedUser;
+    } catch (err) {
+      console.log("ERROR updateUserFieldById users.posgres", err);
+      return { error: true, data: err };
+    }
+  }
+  // Elimina un usuario por id
+  async deleteUserById(uid) {
+    try {
+      const user = await usersServices.getUserById(uid);
+
+      if (!user || user.error) {
+        return {
+          error: true,
+          message: `No se puede encontrar el usuario con ID ${uid}`,
+        };
+      }
+
+      const deletedUser = await usersServices.deleteUser(uid);
+
+      if (deletedUser.error) {
+        return { error: true, message: "Error al eliminar el usuario" };
+      }
+
+      return deletedUser;
+    } catch (err) {
+      console.log("ERROR deleteUserById users.posgres", err);
+      return { error: true, data: err };
     }
   }
 }

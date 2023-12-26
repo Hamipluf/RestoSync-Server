@@ -2,11 +2,13 @@ import axios from "axios";
 import { config } from "dotenv";
 config();
 import customResponses from "../utils/customResponses.js";
-import fs from "fs";
+import UserManager from "../persistencia/DAOs/user.posgresql.js";
+const userManager = new UserManager();
 
 const url_bucket = process.env.URL_SERVICE_BUCKET;
 // Sube una imagen
 export const uploadImage = async (req, res) => {
+  const user = req.user.user;
   const token = req.user.token;
   const file = req.file;
   const formData = new FormData();
@@ -38,7 +40,17 @@ export const uploadImage = async (req, res) => {
       }
     );
     if (apiResponse.data.success) {
-      return res.status(200).json(apiResponse.data);
+      // Guarda la key de la foto en el usuario correspondiente
+      const savePhoto = await userManager.updateUserFieldById(
+        user.id,
+        "photos",
+        [...user.photos, apiResponse.data.data.Key]
+      );
+      if (savePhoto.success) {
+        return res.status(200).json(customResponses.badResponse(400, "No se pudo guardar la imagen.", savePhoto));
+      } else {
+        return res.status(400).json(apiResponse.data);
+      }
     } else {
       return res.status(400).json(apiResponse.data);
     }
@@ -100,11 +112,14 @@ export const deleteImage = async (req, res) => {
       );
   }
   try {
-    const apiResponse = await axios.delete(`${url_bucket}/api/image/delete/${key}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const apiResponse = await axios.delete(
+      `${url_bucket}/api/image/delete/${key}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     if (apiResponse.data.success) {
       return res.status(200).json(apiResponse.data);
     } else {
