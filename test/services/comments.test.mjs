@@ -61,7 +61,7 @@ describe("Comments services", () => {
     expect(result).to.have.property("email").that.is.a("string");
     expect(result).to.have.property("role").that.is.a("number");
     expect(result).to.have.property("username").that.is.a("string");
-    expect(result).to.have.property("photos").that.is.null;
+    expect(result).to.have.property("profile_photo").that.is.null;
   });
   it("Delete comment by id", async () => {
     const result = await commentsService.deleteComment(commentIdcreated);

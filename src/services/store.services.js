@@ -102,7 +102,7 @@ class StoresService {
   getStoreEmployees = async (storeId) => {
     try {
       const employees = await query(
-        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM employees e JOIN users u ON e.user_id = u.id WHERE e.store_id = $1",
+        "SELECT u.id, u.name, u.last_name, u.email, u.profile_photo, u.username, u.role FROM employees e JOIN users u ON e.user_id = u.id WHERE e.store_id = $1",
         [storeId]
       );
       return employees.rows;

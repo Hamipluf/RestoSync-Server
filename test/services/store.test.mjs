@@ -97,7 +97,7 @@ describe("Store services", () => {
       expect(user).to.have.property("email").that.is.a("string");
       expect(user).to.have.property("role").that.is.a("number");
       expect(user).to.have.property("username").that.is.a("string");
-      expect(user).to.have.property("photos").that.is.null;
+      expect(user).to.have.property("profile_photo").that.is.null;
     });
   });
   it("Get all products of store", async () => {

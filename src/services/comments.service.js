@@ -78,7 +78,7 @@ class CommentsService {
   getCommentUser = async (commentId) => {
     try {
       const data = await query(
-        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = $1",
+        "SELECT u.id, u.name, u.last_name, u.email, u.profile_photo, u.username, u.role FROM comments c JOIN users u ON c.user_id = u.id WHERE c.id = $1",
         [commentId]
       );
       const user = data.rows[0];

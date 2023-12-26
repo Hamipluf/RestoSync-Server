@@ -48,7 +48,7 @@ export default class UserManager {
         // 1 user, 2 user premium, 3 odmin
         role: roleUser,
         username,
-        photos: null,
+        profile_photo: null,
       };
       const newUser = await usersServices.createAnUser(userData);
       let response;

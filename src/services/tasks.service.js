@@ -73,7 +73,7 @@ class TasksService {
   getTaskUser = async (taskId) => {
     try {
       const data = await query(
-        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM tasks t JOIN users u ON t.user_id = u.id WHERE t.id = $1",
+        "SELECT u.id, u.name, u.last_name, u.email, u.profile_photo, u.username, u.role FROM tasks t JOIN users u ON t.user_id = u.id WHERE t.id = $1",
         [taskId]
       );
       const user = data.rows[0];

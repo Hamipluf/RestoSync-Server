@@ -43,7 +43,7 @@ export const uploadImage = async (req, res) => {
       // Guarda la key de la foto en el usuario correspondiente
       const savePhoto = await userManager.updateUserFieldById(
         user.id,
-        "photos",
+        "photo",
         apiResponse.data.data.Key
       );
       if (savePhoto.success) {

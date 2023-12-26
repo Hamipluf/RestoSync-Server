@@ -52,7 +52,7 @@ describe("Tasks services", () => {
     expect(result).to.have.property("email").that.is.a("string");
     expect(result).to.have.property("role").that.is.a("number");
     expect(result).to.have.property("username").that.is.a("string");
-    expect(result).to.have.property("photos").that.is.null;
+    expect(result).to.have.property("profile_photo").that.is.null;
   });
   it("Get all task of a user", async () => {
     const userId = 2; // Id ramiro

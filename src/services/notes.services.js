@@ -19,7 +19,7 @@ class NotesService {
   getAllNotesByUserId = async (userId) => {
     try {
       const notes = await query(
-        "SELECT notes.*, owner_id AS owner_id, users.name, users.email, users.username, users.photos, users.last_name, users.role FROM notes INNER JOIN users ON notes.owner_id = owner_id WHERE users.id = $1",
+        "SELECT notes.*, owner_id AS owner_id, users.name, users.email, users.username, users.profile_photo, users.last_name, users.role FROM notes INNER JOIN users ON notes.owner_id = owner_id WHERE users.id = $1",
         [userId]
       );
 
@@ -127,7 +127,7 @@ class NotesService {
   getNoteOwner = async (noteId) => {
     try {
       const data = await query(
-        "SELECT u.id, u.name, u.last_name, u.email, u.photos, u.username, u.role FROM notes n JOIN users u ON n.owner_id = u.id WHERE n.id = $1",
+        "SELECT u.id, u.name, u.last_name, u.email, u.profile_photo, u.username, u.role FROM notes n JOIN users u ON n.owner_id = u.id WHERE n.id = $1",
         [noteId]
       );
       const owner = data.rows[0];
@@ -141,7 +141,7 @@ class NotesService {
   getAllCommentsByNoteId = async (noteId) => {
     try {
       const comments = await query(
-        "SELECT c.*, u.name as user_name, u.email as user_email, u.username as user_username, u.photos as user_photos, u.last_name as user_last_name, u.role as user_role " +
+        "SELECT c.*, u.name as user_name, u.email as user_email, u.username as user_username, u.profile_photo as user_profile_photo, u.last_name as user_last_name, u.role as user_role " +
           "FROM comments c " +
           "JOIN note_comments nc ON c.id = nc.comment_id " +
           "JOIN users u ON c.user_id = u.id " +

@@ -7,7 +7,7 @@ class UsersService {
   getAllUsers = async () => {
     try {
       const newUser = await query(
-        "SELECT id, name, last_name, email, role, username, photos FROM users"
+        "SELECT id, name, last_name, email, role, username, profile_photo FROM users"
       );
       return newUser;
     } catch (err) {
@@ -18,7 +18,7 @@ class UsersService {
   getUserById = async (uid) => {
     try {
       const data = await query(
-        "SELECT id, name, last_name, email, username, photos, role FROM users WHERE id = $1",
+        "SELECT id, name, last_name, email, username, profile_photo, role FROM users WHERE id = $1",
         [uid]
       );
       const user = data.rows[0];
@@ -31,7 +31,7 @@ class UsersService {
   getUserByEmail = async (email) => {
     try {
       const data = await query(
-        "SELECT id, name, last_name, email, username, photos, role FROM users WHERE email = $1",
+        "SELECT id, name, last_name, email, username, profile_photo, role FROM users WHERE email = $1",
         [email]
       );
       const user = data.rows[0];
@@ -42,11 +42,11 @@ class UsersService {
   };
   // Crea un usuario
   createAnUser = async (user) => {
-    const { name, last_name, email, password, username, role, photos } = user;
+    const { name, last_name, email, password, username, role, profile_photo } = user;
     try {
       const userCreated = await query(
-        "INSERT INTO users (name, last_name, email, password, role, username, photos) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-        [name, last_name, email, password, role, username, photos]
+        "INSERT INTO users (name, last_name, email, password, role, username, profile_photo) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+        [name, last_name, email, password, role, username, profile_photo]
       );
       const user = userCreated.rows[0];
       return user.length < 1 ? { error: true, data: user } : user;
@@ -72,11 +72,11 @@ class UsersService {
   };
   // Actualiza un usuario por su ID
   updateUserById = async (uid, updatedUserData) => {
-    const { name, last_name, email, username, role, photos } = updatedUserData;
+    const { name, last_name, email, username, role, profile_photo } = updatedUserData;
     try {
       const userUpdated = await query(
-        "UPDATE users SET name = $2, last_name = $3, email = $4,  role = $5, username = $6, photos = $7 WHERE id = $1 RETURNING id, email, name, last_name, username, photos, role",
-        [uid, name, last_name, email, role, username, photos]
+        "UPDATE users SET name = $2, last_name = $3, email = $4,  role = $5, username = $6, profile_photo = $7 WHERE id = $1 RETURNING id, email, name, last_name, username, profile_photo, role",
+        [uid, name, last_name, email, role, username, profile_photo]
       );
       const updatedUser = userUpdated.rows[0];
       return updatedUser;
@@ -88,7 +88,7 @@ class UsersService {
   deleteUser = async (uid) => {
     try {
       const taskDeleted = await query(
-        "DELETE FROM users WHERE id = $1 RETURNING id, name, last_name, email, username, photos, role ",
+        "DELETE FROM users WHERE id = $1 RETURNING id, name, last_name, email, username, profile_photo, role ",
         [uid]
       );
       return taskDeleted.rows[0];

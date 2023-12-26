@@ -19,7 +19,7 @@ describe("Users Service", () => {
     password: "contrasena",
     username: "User Test",
     role: 1,
-    photos: null,
+    profile_photo: null,
   };
   // Prueba para crear un usuario
   it("Create a user", async () => {
@@ -37,7 +37,7 @@ describe("Users Service", () => {
       .to.have.property("username")
       .that.equal(userData.username);
     expect(result.rows[0]).to.have.property("role").that.equal(1); // Valor por defecto
-    expect(result.rows[0]).to.have.property("photos").that.is.null; // Valor por defecto
+    expect(result.rows[0]).to.have.property("profile_photo").that.is.null; // Valor por defecto
   });
   // Prueba para obtener un usuario por ID
   it("Get user for id", async () => {
@@ -73,7 +73,7 @@ describe("Users Service", () => {
       expect(user).to.have.property("email").that.is.a("string");
       expect(user).to.have.property("role").that.is.a("number");
       expect(user).to.have.property("username").that.is.a("string");
-      expect(user).to.have.property("photos").that.is.null;
+      expect(user).to.have.property("profile_photo").that.is.null;
     });
   });
   // Prueba para eliminar un usuario por ID
