@@ -26,7 +26,7 @@ export const uploadImage = async (req, res) => {
 
   try {
     const formData = new FormData();
-    const blob = new Blob([file.buffer], { type: file.mimetype });
+    const blob = Buffer.from(file.buffer, file.mimetype);
     formData.append("image", blob, {
       filename: file.fieldname,
       originalname: file.originalname,
